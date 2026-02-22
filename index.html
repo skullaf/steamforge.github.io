@@ -1,0 +1,2409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SteamForge</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+        
+        :root {
+            --bg: #000;
+            --bg2: #080808;
+            --bg3: #0f0f0f;
+            --bg4: #161616;
+            --bg5: #1c1c1c;
+            --border: #1a1a1a;
+            --border2: #252525;
+            --border3: #303030;
+            --text: #e8e8e8;
+            --text2: #777;
+            --text3: #333;
+            --text4: #222;
+            --white: #fff;
+            --r: 8px;
+            --rs: 5px;
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Inter', system-ui, sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth
+        }
+        
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden
+        }
+        
+        #bgCanvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none
+        }
+        
+        .shell {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1
+        }
+        
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100
+        }
+        
+        .sidebar-logo {
+            padding: 24px 20px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+        
+        .sidebar-logo-mark {
+            width: 28px;
+            height: 28px;
+            background: #fff;
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            color: #000;
+            flex-shrink: 0;
+            font-family: var(--mono);
+            font-weight: 900;
+            letter-spacing: -1px
+        }
+        
+        .sidebar-logo-text {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -.4px;
+            font-family: var(--mono)
+        }
+        
+        .nav {
+            flex: 1;
+            padding: 12px 0;
+            overflow-y: auto
+        }
+        
+        .nav-section {
+            padding: 8px 16px 4px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text3)
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 16px;
+            font-size: 13px;
+            color: var(--text2);
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            transition: color .15s, background .15s;
+            border-left: 2px solid transparent;
+            font-family: var(--sans)
+        }
+        
+        .nav-item:hover {
+            color: var(--text);
+            background: var(--bg3)
+        }
+        
+        .nav-item.active {
+            color: var(--white);
+            background: var(--bg3);
+            border-left-color: var(--white)
+        }
+        
+        .ni {
+            font-size: 13px;
+            width: 18px;
+            text-align: center;
+            flex-shrink: 0;
+            font-family: var(--mono);
+            font-weight: 700;
+            color: inherit
+        }
+        
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--text3)
+        }
+        
+        .sidebar-footer a {
+            color: var(--text3);
+            text-decoration: none;
+            transition: color .15s
+        }
+        
+        .skullaf-link {
+            font-weight: 600;
+            transition: color .25s, text-shadow .25s !important
+        }
+        
+        .skullaf-link:hover {
+            color: #fff !important;
+            text-shadow: 0 0 10px rgba(255, 255, 255, .5) !important
+        }
+        
+        .main {
+            margin-left: 220px;
+            flex: 1;
+            min-height: 100vh
+        }
+        
+        .topbar {
+            height: 52px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            background: var(--bg2);
+            position: sticky;
+            top: 0;
+            z-index: 50
+        }
+        
+        .topbar-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text2);
+            font-family: var(--mono)
+        }
+        
+        .topbar-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 6px 12px;
+            width: 280px;
+            transition: border-color .18s
+        }
+        
+        .topbar-search:focus-within {
+            border-color: var(--border3);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .03)
+        }
+        
+        .topbar-search input {
+            background: none;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 13px;
+            width: 100%
+        }
+        
+        .topbar-search input::placeholder {
+            color: var(--text3)
+        }
+        
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+        
+        .topbar-badge {
+            font-size: 10px;
+            font-family: var(--mono);
+            color: var(--text3);
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 3px 8px
+        }
+        
+        .page {
+            display: none;
+            padding: 28px;
+            animation: fadeUp .3s ease both
+        }
+        
+        .page.active {
+            display: block
+        }
+        
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            font-family: var(--mono)
+        }
+        
+        .page-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -.5px;
+            margin-bottom: 4px
+        }
+        
+        .page-sub {
+            font-size: 13px;
+            color: var(--text3);
+            margin-bottom: 24px
+        }
+        
+        .card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px
+        }
+        
+        .card-sm {
+            padding: 14px 16px
+        }
+        
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+        
+        @media(max-width:900px) {
+            .grid-4 {
+                grid-template-columns: repeat(2, 1fr)
+            }
+            .grid-3 {
+                grid-template-columns: 1fr 1fr
+            }
+            .grid-2 {
+                grid-template-columns: 1fr
+            }
+        }
+        
+        .stat-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px 20px
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 8px;
+            font-family: var(--mono)
+        }
+        
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -.5px;
+            font-family: var(--mono);
+            margin-bottom: 3px
+        }
+        
+        .stat-sub {
+            font-size: 11px;
+            color: var(--text3)
+        }
+        
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px
+        }
+        
+        .game-tile {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color .15s, transform .12s
+        }
+        
+        .game-tile:hover {
+            border-color: var(--border3);
+            transform: translateY(-2px)
+        }
+        
+        .game-tile img {
+            width: 100%;
+            height: 94px;
+            object-fit: cover;
+            filter: grayscale(80%) brightness(.8);
+            transition: filter .2s
+        }
+        
+        .game-tile:hover img {
+            filter: grayscale(40%) brightness(.9)
+        }
+        
+        .game-tile-ph {
+            width: 100%;
+            height: 94px;
+            background: var(--bg4);
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            color: var(--text3);
+            font-family: var(--mono)
+        }
+        
+        .game-tile-info {
+            padding: 10px 12px
+        }
+        
+        .game-tile-name {
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 3px
+        }
+        
+        .game-tile-meta {
+            font-size: 10px;
+            color: var(--text3);
+            font-family: var(--mono)
+        }
+        
+        .sresult {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            transition: border-color .15s, background .15s, transform .12s;
+            animation: cardIn .25s ease both
+        }
+        
+        .sresult:hover {
+            border-color: var(--border2);
+            background: var(--bg3);
+            transform: translateY(-1px)
+        }
+        
+        .sresult.sel {
+            border-color: var(--border3);
+            background: var(--bg3)
+        }
+        
+        .sresult img {
+            width: 60px;
+            height: 34px;
+            border-radius: 4px;
+            object-fit: cover;
+            filter: grayscale(80%);
+            border: 1px solid var(--border);
+            flex-shrink: 0
+        }
+        
+        .sresult-ph {
+            width: 60px;
+            height: 34px;
+            border-radius: 4px;
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            display: grid;
+            place-items: center;
+            font-size: 10px;
+            flex-shrink: 0;
+            color: var(--text3);
+            font-family: var(--mono)
+        }
+        
+        .sresult-info {
+            flex: 1;
+            min-width: 0
+        }
+        
+        .sresult-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+        
+        .sresult-id {
+            font-size: 10px;
+            color: var(--text3);
+            font-family: var(--mono)
+        }
+        
+        .sresult-badge {
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 9px;
+            color: var(--text3);
+            font-family: var(--mono);
+            flex-shrink: 0
+        }
+        
+        .detail-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            margin-top: 16px;
+            animation: fadeUp .25s ease both
+        }
+        
+        .detail-hero {
+            position: relative;
+            height: 160px;
+            background: var(--bg4);
+            overflow: hidden
+        }
+        
+        .detail-hero img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(70%) brightness(.6)
+        }
+        
+        .detail-hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(0, 0, 0, .9) 0%, rgba(0, 0, 0, .4) 60%, transparent 100%)
+        }
+        
+        .detail-hero-content {
+            position: absolute;
+            inset: 0;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end
+        }
+        
+        .detail-name {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -.3px;
+            margin-bottom: 6px
+        }
+        
+        .detail-body {
+            padding: 20px 24px
+        }
+        
+        .detail-meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: var(--text3)
+        }
+        
+        .detail-meta-row span strong {
+            color: var(--text2)
+        }
+        
+        .detail-meta-row a {
+            color: var(--text2);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border2);
+            transition: color .12s
+        }
+        
+        .detail-meta-row a:hover {
+            color: var(--text)
+        }
+        
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+            margin-top: 12px
+        }
+        
+        .price-item {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 12px
+        }
+        
+        .price-country {
+            font-size: 10px;
+            color: var(--text3);
+            font-family: var(--mono);
+            margin-bottom: 4px
+        }
+        
+        .price-val {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--mono)
+        }
+        
+        .price-disc {
+            font-size: 10px;
+            color: #555;
+            font-family: var(--mono)
+        }
+        
+        .ai-panel {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: var(--r);
+            padding: 16px;
+            margin-top: 12px
+        }
+        
+        .ai-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 10px;
+            font-family: var(--mono)
+        }
+        
+        .ai-bar-wrap {
+            margin-bottom: 10px
+        }
+        
+        .ai-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text2);
+            margin-bottom: 4px;
+            font-family: var(--mono)
+        }
+        
+        .ai-bar {
+            height: 4px;
+            background: var(--bg4);
+            border-radius: 2px;
+            overflow: hidden
+        }
+        
+        .ai-bar-fill {
+            height: 100%;
+            background: #fff;
+            border-radius: 2px;
+            transition: width 1s ease
+        }
+        
+        .ai-verdict {
+            font-size: 12px;
+            color: var(--text2);
+            line-height: 1.6;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border)
+        }
+        
+        .file-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px
+        }
+        
+        @media(max-width:700px) {
+            .file-grid {
+                grid-template-columns: 1fr
+            }
+        }
+        
+        .file-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            overflow: hidden
+        }
+        
+        .file-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg3)
+        }
+        
+        .file-name {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text2);
+            font-family: var(--mono)
+        }
+        
+        .file-badge {
+            font-size: 8px;
+            font-weight: 700;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            padding: 2px 5px;
+            border-radius: 3px;
+            background: var(--bg4);
+            border: 1px solid var(--border2);
+            color: var(--text3);
+            font-family: var(--mono)
+        }
+        
+        .file-body {
+            padding: 12px;
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text3);
+            line-height: 1.75;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border2) transparent
+        }
+        
+        .file-body::-webkit-scrollbar {
+            width: 3px
+        }
+        
+        .file-body::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 2px
+        }
+        
+        .kw {
+            color: #ccc;
+            font-weight: 600
+        }
+        
+        .str {
+            color: #666
+        }
+        
+        .num {
+            color: #999
+        }
+        
+        .cm {
+            color: #2a2a2a
+        }
+        
+        .fn {
+            color: #aaa
+        }
+        
+        .input {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 10px 12px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 13px;
+            outline: none;
+            transition: border-color .18s
+        }
+        
+        .input:focus {
+            border-color: var(--border3);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, .02)
+        }
+        
+        .input::placeholder {
+            color: var(--text3)
+        }
+        
+        .input-wrap {
+            position: relative
+        }
+        
+        .input-wrap .input {
+            padding-left: 32px
+        }
+        
+        .input-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text3);
+            font-size: 13px;
+            pointer-events: none;
+            font-family: var(--mono)
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: var(--rs);
+            padding: 10px 18px;
+            font-family: var(--sans);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity .15s, transform .1s
+        }
+        
+        .btn:hover {
+            opacity: .82
+        }
+        
+        .btn:active {
+            transform: scale(.97)
+        }
+        
+        .btn:disabled {
+            opacity: .2;
+            cursor: not-allowed;
+            transform: none
+        }
+        
+        .btn-ghost {
+            background: var(--bg3);
+            color: var(--text2);
+            border: 1px solid var(--border)
+        }
+        
+        .btn-ghost:hover {
+            background: var(--bg4);
+            color: var(--text);
+            opacity: 1
+        }
+        
+        .mode-toggle {
+            display: inline-flex;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 3px;
+            gap: 2px;
+            margin-bottom: 12px
+        }
+        
+        .mode-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text3);
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background .15s, color .15s
+        }
+        
+        .mode-btn.active {
+            background: var(--bg5);
+            color: var(--text);
+            border-color: var(--border2)
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px
+        }
+        
+        .tab {
+            background: none;
+            border: none;
+            color: var(--text3);
+            font-family: var(--sans);
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color .15s, border-color .15s
+        }
+        
+        .tab:hover {
+            color: var(--text2)
+        }
+        
+        .tab.active {
+            color: var(--text);
+            border-bottom-color: var(--white)
+        }
+        
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 11px;
+            color: var(--text3);
+            min-height: 18px;
+            margin-top: 8px;
+            font-family: var(--mono)
+        }
+        
+        .sdot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: var(--text3);
+            flex-shrink: 0;
+            transition: background .25s
+        }
+        
+        .status.loading .sdot {
+            background: #555;
+            animation: blink .85s infinite
+        }
+        
+        .status.loading,
+        .status.ok {
+            color: var(--text2)
+        }
+        
+        .status.ok .sdot {
+            background: #555
+        }
+        
+        .status.err {
+            color: #3a3a3a
+        }
+        
+        .status.err .sdot {
+            background: #3a3a3a
+        }
+        
+        .spin {
+            display: inline-block;
+            width: 11px;
+            height: 11px;
+            border: 2px solid rgba(0, 0, 0, .15);
+            border-top-color: #000;
+            border-radius: 50%;
+            animation: rot .6s linear infinite;
+            vertical-align: middle
+        }
+        
+        .spin-l {
+            border-color: rgba(255, 255, 255, .06);
+            border-top-color: var(--text3)
+        }
+        
+        .tc {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            pointer-events: none
+        }
+        
+        .toast {
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: var(--rs);
+            padding: 10px 14px;
+            font-size: 12px;
+            color: var(--text2);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, .9);
+            animation: fadeUp .2s ease both;
+            transition: opacity .3s;
+            font-family: var(--mono)
+        }
+        
+        .tag {
+            background: var(--bg4);
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: var(--text3);
+            font-weight: 500
+        }
+        
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0
+        }
+        
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        
+        .spacer {
+            flex: 1
+        }
+        
+        .mt8 {
+            margin-top: 8px
+        }
+        
+        .mt12 {
+            margin-top: 12px
+        }
+        
+        .mt16 {
+            margin-top: 16px
+        }
+        
+        .mb8 {
+            margin-bottom: 8px
+        }
+        
+        .mb12 {
+            margin-bottom: 12px
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: var(--text3);
+            font-size: 13px;
+            font-family: var(--mono)
+        }
+        
+        .empty-icon {
+            font-size: 11px;
+            opacity: .3;
+            margin-bottom: 10px;
+            font-family: var(--mono)
+        }
+        
+        .chart-wrap {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 80px;
+            margin-top: 8px
+        }
+        
+        .chart-bar {
+            flex: 1;
+            background: var(--bg4);
+            border-radius: 2px 2px 0 0;
+            cursor: default;
+            position: relative
+        }
+        
+        .chart-bar:hover {
+            background: var(--bg5)
+        }
+        
+        .chart-bar-tip {
+            position: absolute;
+            bottom: calc(100% + 4px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg4);
+            border: 1px solid var(--border2);
+            border-radius: 3px;
+            padding: 3px 6px;
+            font-size: 9px;
+            color: var(--text2);
+            white-space: nowrap;
+            font-family: var(--mono);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .15s;
+            z-index: 10
+        }
+        
+        .chart-bar:hover .chart-bar-tip {
+            opacity: 1
+        }
+        
+        .chart-labels {
+            display: flex;
+            gap: 3px;
+            margin-top: 4px
+        }
+        
+        .chart-label {
+            flex: 1;
+            font-size: 8px;
+            color: var(--text3);
+            text-align: center;
+            font-family: var(--mono)
+        }
+        
+        .depot-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--rs);
+            padding: 12px 14px
+        }
+        
+        .depot-id {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text2);
+            margin-bottom: 4px
+        }
+        
+        .depot-meta {
+            font-size: 10px;
+            color: var(--text3);
+            font-family: var(--mono);
+            line-height: 1.6
+        }
+        
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+        
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+        
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px)
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+        
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1
+            }
+            50% {
+                opacity: .2
+            }
+        }
+        
+        @keyframes rot {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0
+            }
+            100% {
+                background-position: -200% 0
+            }
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 3px
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="bgCanvas"></canvas>
+    <div class="tc" id="tc"></div>
+    <div class="shell">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <div class="sidebar-logo-mark">SF</div>
+                <div class="sidebar-logo-text">SteamForge</div>
+            </div>
+            <nav class="nav">
+                <div class="nav-section">Explore</div>
+                <button class="nav-item active" onclick="goTo('home')"><span class="ni">[~]</span> Overview</button>
+                <button class="nav-item" onclick="goTo('store')"><span class="ni">[S]</span> Store</button>
+                <button class="nav-item" onclick="goTo('search')"><span class="ni">[?]</span> Search</button>
+                <div class="nav-section" style="margin-top:8px">Tools</div>
+                <button class="nav-item" onclick="goTo('pricing')"><span class="ni">[$]</span> Pricing</button>
+                <button class="nav-item" onclick="goTo('predict')"><span class="ni">[A]</span> AI Predict</button>
+                <button class="nav-item" onclick="goTo('generator')"><span class="ni">[G]</span> Generator</button>
+                <div class="nav-section" style="margin-top:8px">Data</div>
+                <button class="nav-item" onclick="goTo('depots')"><span class="ni">[D]</span> Depots</button>
+                <button class="nav-item" onclick="goTo('api')"><span class="ni">[/]</span> API Browser</button>
+            </nav>
+            <div class="sidebar-footer">
+                made by <a class="skullaf-link" href="https://github.com/skullaf" target="_blank">skullaf</a>
+                <div style="margin-top:4px;color:var(--text4)">Steam Web API Platform</div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+            <div class="topbar">
+                <div class="topbar-title" id="topbarTitle">overview</div>
+                <div class="topbar-search">
+                    <span style="color:var(--text3);font-family:var(--mono);font-size:12px">/?</span>
+                    <input type="text" id="globalSearch" placeholder="Quick search any game..." autocomplete="off">
+                </div>
+                <div class="topbar-right">
+                    <div class="topbar-badge" id="clockBadge">--:--:--</div>
+                    <div class="topbar-badge">Steam API</div>
+                </div>
+            </div>
+
+            <!-- HOME -->
+            <div class="page active" id="page-home">
+                <div class="page-title">Overview</div>
+                <div class="page-sub">Steam API platform -- search, analyze, generate</div>
+                <div class="grid-4 mb12">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Games</div>
+                        <div class="stat-value">150K+</div>
+                        <div class="stat-sub">on Steam store</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">API Endpoints</div>
+                        <div class="stat-value">8</div>
+                        <div class="stat-sub">available tools</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Regions</div>
+                        <div class="stat-value">20+</div>
+                        <div class="stat-sub">price regions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Generator</div>
+                        <div class="stat-value">v1.0</div>
+                        <div class="stat-sub">lua + manifest</div>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <div class="section-title">Quick Search</div>
+                        <div class="input-wrap mb8"><span class="input-icon" style="font-style:normal">/s</span><input class="input" type="text" id="homeSearchInput" placeholder="Search a game..." autocomplete="off"></div>
+                        <div style="display:flex;gap:8px">
+                            <button class="btn" onclick="homeSearch()"><span id="homeSearchTxt">Search</span></button>
+                            <button class="btn btn-ghost" onclick="goTo('generator')">[G] Generator</button>
+                        </div>
+                        <div class="status" id="homeSt">
+                            <div class="sdot"></div><span id="homeStTxt">Ready</span></div>
+                        <div id="homeResults" style="margin-top:12px;display:grid;gap:6px"></div>
+                    </div>
+                    <div>
+                        <div class="section-title">Platform Tools</div>
+                        <div style="display:grid;gap:8px">
+                            <div class="card card-sm" style="cursor:pointer" onclick="goTo('store')">
+                                <div style="font-size:13px;font-weight:600;margin-bottom:3px">[S] Store Browser</div>
+                                <div style="font-size:11px;color:var(--text3)">Browse featured, top sellers, new releases</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="goTo('pricing')">
+                                <div style="font-size:13px;font-weight:600;margin-bottom:3px">[$] Pricing Lookup</div>
+                                <div style="font-size:11px;color:var(--text3)">Compare prices across 20+ global regions</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="goTo('predict')">
+                                <div style="font-size:13px;font-weight:600;margin-bottom:3px">[AI] Price Prediction</div>
+                                <div style="font-size:11px;color:var(--text3)">Predict sale likelihood and discount depth</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="goTo('depots')">
+                                <div style="font-size:13px;font-weight:600;margin-bottom:3px">[D] Depot Explorer</div>
+                                <div style="font-size:11px;color:var(--text3)">Browse depots, manifests, branches</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="goTo('generator')">
+                                <div style="font-size:13px;font-weight:600;margin-bottom:3px">[G] File Generator</div>
+                                <div style="font-size:11px;color:var(--text3)">Generate Lua scripts and ACF manifests</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STORE -->
+            <div class="page" id="page-store">
+                <div class="page-title">Store</div>
+                <div class="page-sub">Browse the Steam store via API</div>
+                <div class="tabs">
+                    <button class="tab active" onclick="storeTab(this,'featured')">Featured</button>
+                    <button class="tab" onclick="storeTab(this,'topsellers')">Top Sellers</button>
+                    <button class="tab" onclick="storeTab(this,'newreleases')">New Releases</button>
+                    <button class="tab" onclick="storeTab(this,'specials')">On Sale</button>
+                </div>
+                <div id="storeGrid" class="game-grid"></div>
+            </div>
+
+            <!-- SEARCH -->
+            <div class="page" id="page-search">
+                <div class="page-title">Search</div>
+                <div class="page-sub">Search by name or App ID</div>
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="srchByName" onclick="setSearchMode('name')">By Name</button>
+                    <button class="mode-btn" id="srchById" onclick="setSearchMode('id')">By App ID</button>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                    <div class="input-wrap" style="flex:1"><span class="input-icon" style="font-style:normal">/s</span><input class="input" type="text" id="srchInput" placeholder="Search Steam games..." autocomplete="off"></div>
+                    <button class="btn" id="srchBtn" onclick="doSearch()"><span id="srchBtnTxt">Search</span></button>
+                </div>
+                <div class="status" id="srchSt">
+                    <div class="sdot"></div><span id="srchStTxt">Enter a game name or App ID</span></div>
+                <div id="srchResults" style="margin-top:14px;display:grid;gap:6px"></div>
+                <div id="srchDetail"></div>
+            </div>
+
+            <!-- PRICING -->
+            <div class="page" id="page-pricing">
+                <div class="page-title">Pricing</div>
+                <div class="page-sub">Compare prices across global regions</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                    <div class="input-wrap" style="flex:1"><span class="input-icon" style="font-style:normal">$</span><input class="input" type="text" id="priceInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
+                    <button class="btn" id="priceBtn" onclick="doPriceSearch()"><span id="priceBtnTxt">Lookup</span></button>
+                </div>
+                <div class="status" id="priceSt">
+                    <div class="sdot"></div><span id="priceStTxt">Enter a game to compare global pricing</span></div>
+                <div id="priceResults"></div>
+            </div>
+
+            <!-- AI PREDICT -->
+            <div class="page" id="page-predict">
+                <div class="page-title">AI Prediction</div>
+                <div class="page-sub">Predict sale likelihood, discount depth and trends using game metadata</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                    <div class="input-wrap" style="flex:1"><span class="input-icon" style="font-style:normal">AI</span><input class="input" type="text" id="predictInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
+                    <button class="btn" id="predictBtn" onclick="doPredictSearch()"><span id="predictBtnTxt">Analyze</span></button>
+                </div>
+                <div class="status" id="predictSt">
+                    <div class="sdot"></div><span id="predictStTxt">Enter a game to run AI analysis</span></div>
+                <div id="predictResults"></div>
+            </div>
+
+            <!-- GENERATOR -->
+            <div class="page" id="page-generator">
+                <div class="page-title">File Generator</div>
+                <div class="page-sub">Generate Lua scripts and ACF manifests</div>
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="genByName" onclick="setGenMode('name')">By Name</button>
+                    <button class="mode-btn" id="genById" onclick="setGenMode('id')">By App ID</button>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                    <div class="input-wrap" style="flex:1"><span class="input-icon" style="font-style:normal">/g</span><input class="input" type="text" id="genInput" placeholder="Search Steam games..." autocomplete="off"></div>
+                    <button class="btn" id="genBtn" onclick="doGenSearch()"><span id="genBtnTxt">Search</span></button>
+                </div>
+                <div class="status" id="genSt">
+                    <div class="sdot"></div><span id="genStTxt">Search for a game to generate files</span></div>
+                <div id="genResults" style="margin-top:12px;display:grid;gap:6px"></div>
+                <div id="genDetail"></div>
+            </div>
+
+            <!-- DEPOTS -->
+            <div class="page" id="page-depots">
+                <div class="page-title">Depot Explorer</div>
+                <div class="page-sub">Browse depots, manifests and branches for any app</div>
+                <div style="display:flex;gap:8px;margin-bottom:8px">
+                    <div class="input-wrap" style="flex:1"><span class="input-icon" style="font-style:normal">ID</span><input class="input" type="text" id="depotInput" placeholder="Enter App ID or game name..." autocomplete="off"></div>
+                    <button class="btn" id="depotBtn" onclick="doDepotSearch()"><span id="depotBtnTxt">Explore</span></button>
+                </div>
+                <div class="status" id="depotSt">
+                    <div class="sdot"></div><span id="depotStTxt">Enter an App ID to explore depots</span></div>
+                <div id="depotResults"></div>
+            </div>
+
+            <!-- API BROWSER -->
+            <div class="page" id="page-api">
+                <div class="page-title">API Browser</div>
+                <div class="page-sub">Explore raw Steam Web API endpoints</div>
+                <div class="grid-2">
+                    <div>
+                        <div class="section-title">Endpoints</div>
+                        <div style="display:grid;gap:6px">
+                            <div class="card card-sm" style="cursor:pointer" onclick="runApi('appdetails')">
+                                <div style="font-size:12px;font-weight:600;font-family:var(--mono);margin-bottom:2px;color:var(--text2)">GET /api/appdetails</div>
+                                <div style="font-size:11px;color:var(--text3)">Full app details, pricing, media, system reqs</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="runApi('storesearch')">
+                                <div style="font-size:12px;font-weight:600;font-family:var(--mono);margin-bottom:2px;color:var(--text2)">GET /api/storesearch</div>
+                                <div style="font-size:11px;color:var(--text3)">Search Steam store by term</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="runApi('featured')">
+                                <div style="font-size:12px;font-weight:600;font-family:var(--mono);margin-bottom:2px;color:var(--text2)">GET /api/featured</div>
+                                <div style="font-size:11px;color:var(--text3)">Featured games on store front</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="runApi('featuredcategories')">
+                                <div style="font-size:12px;font-weight:600;font-family:var(--mono);margin-bottom:2px;color:var(--text2)">GET /api/featuredcategories</div>
+                                <div style="font-size:11px;color:var(--text3)">Top sellers, new releases, specials</div>
+                            </div>
+                            <div class="card card-sm" style="cursor:pointer" onclick="runApi('packagedetails')">
+                                <div style="font-size:12px;font-weight:600;font-family:var(--mono);margin-bottom:2px;color:var(--text2)">GET /api/packagedetails</div>
+                                <div style="font-size:11px;color:var(--text3)">Package and bundle details</div>
+                            </div>
+                        </div>
+                        <div class="mt12">
+                            <div class="section-title">Custom Request</div>
+                            <input class="input mb8" type="text" id="apiAppId" placeholder="App ID (e.g. 730)" style="margin-bottom:8px">
+                            <button class="btn" onclick="runCustomApi()">Run Request</button>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="section-title">Response</div>
+                        <div id="apiResponse" class="card" style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.7;max-height:520px;overflow-y:auto;white-space:pre-wrap;word-break:break-all">// Select an endpoint to see the raw API response</div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // BACKGROUND
+        (function() {
+            var cv = document.getElementById('bgCanvas'),
+                cx = cv.getContext('2d'),
+                W, H, mx = -9999,
+                my = -9999,
+                pts = [];
+
+            function rsz() {
+                W = cv.width = window.innerWidth;
+                H = cv.height = window.innerHeight
+            }
+
+            function Pt() {
+                this.x = Math.random() * W;
+                this.y = Math.random() * H;
+                this.r = .8 + Math.random() * 1.2;
+                this.vx = (Math.random() - .5) * .14;
+                this.vy = (Math.random() - .5) * .14;
+                this.a = .06 + Math.random() * .1
+            }
+
+            function dst(ax, ay, bx, by) {
+                var dx = ax - bx,
+                    dy = ay - by;
+                return Math.sqrt(dx * dx + dy * dy)
+            }
+
+            function frame() {
+                cx.clearRect(0, 0, W, H);
+                for (var i = 0; i < pts.length; i++) {
+                    var p = pts[i],
+                        dm = dst(p.x, p.y, mx, my);
+                    if (dm < 120) {
+                        var op = (1 - dm / 120) * .1;
+                        cx.beginPath();
+                        cx.moveTo(p.x, p.y);
+                        cx.lineTo(mx, my);
+                        cx.strokeStyle = 'rgba(255,255,255,' + op.toFixed(3) + ')';
+                        cx.lineWidth = .5;
+                        cx.stroke()
+                    }
+                    for (var j = i + 1; j < pts.length; j++) {
+                        var b = pts[j],
+                            dd = dst(p.x, p.y, b.x, b.y);
+                        if (dd < 80) {
+                            var lo = (1 - dd / 80) * .06;
+                            cx.beginPath();
+                            cx.moveTo(p.x, p.y);
+                            cx.lineTo(b.x, b.y);
+                            cx.strokeStyle = 'rgba(255,255,255,' + lo.toFixed(3) + ')';
+                            cx.lineWidth = .4;
+                            cx.stroke()
+                        }
+                    }
+                    var bst = dm < 90 ? (1 - dm / 90) * .25 : 0;
+                    cx.beginPath();
+                    cx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    cx.fillStyle = 'rgba(255,255,255,' + (p.a + bst).toFixed(3) + ')';
+                    cx.fill();
+                    var dx2 = p.x - mx,
+                        dy2 = p.y - my,
+                        d2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                    if (d2 < 70 && d2 > 0) {
+                        var f = (70 - d2) / 70 * .18;
+                        p.vx += (dx2 / d2) * f;
+                        p.vy += (dy2 / d2) * f
+                    }
+                    p.vx *= .97;
+                    p.vy *= .97;
+                    var spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+                    if (spd > .65) {
+                        p.vx = p.vx / spd * .65;
+                        p.vy = p.vy / spd * .65
+                    }
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < -10) p.x = W + 10;
+                    if (p.x > W + 10) p.x = -10;
+                    if (p.y < -10) p.y = H + 10;
+                    if (p.y > H + 10) p.y = -10;
+                }
+                requestAnimationFrame(frame);
+            }
+            window.addEventListener('resize', rsz);
+            window.addEventListener('mousemove', function(e) {
+                mx = e.clientX;
+                my = e.clientY
+            });
+            window.addEventListener('mouseleave', function() {
+                mx = -9999;
+                my = -9999
+            });
+            rsz();
+            for (var i = 0; i < 60; i++) pts.push(new Pt());
+            frame();
+        })();
+
+        // CLOCK
+        function updateClock() {
+            var n = new Date();
+            document.getElementById('clockBadge').textContent = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0') + ':' + String(n.getSeconds()).padStart(2, '0')
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // HELPERS
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        }
+
+        function toast(msg, isErr) {
+            var c = document.getElementById('tc'),
+                d = document.createElement('div');
+            d.className = 'toast';
+            d.textContent = (isErr ? 'err: ' : 'ok: ') + msg;
+            c.appendChild(d);
+            setTimeout(function() {
+                d.style.opacity = '0';
+                setTimeout(function() {
+                    if (d.parentNode) d.parentNode.removeChild(d)
+                }, 320)
+            }, 3200);
+        }
+
+        function setSt(id, txt, cls) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.className = 'status ' + (cls || '');
+            el.querySelector('span').textContent = txt;
+        }
+
+        // NAVIGATION
+        var pageNames = {
+            home: 'overview',
+            store: 'store',
+            search: 'search',
+            pricing: 'pricing',
+            predict: 'ai prediction',
+            generator: 'generator',
+            depots: 'depot explorer',
+            api: 'api browser'
+        };
+
+        function goTo(id) {
+            document.querySelectorAll('.page').forEach(function(p) {
+                p.classList.remove('active')
+            });
+            document.querySelectorAll('.nav-item').forEach(function(n) {
+                n.classList.remove('active')
+            });
+            var pg = document.getElementById('page-' + id);
+            if (pg) pg.classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(function(n) {
+                if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+            });
+            document.getElementById('topbarTitle').textContent = pageNames[id] || id;
+            if (id === 'store' && !storeLoaded) loadStore('featured');
+        }
+
+        // SAFE FETCH
+        var PROXIES = ['https://corsproxy.io/?', 'https://api.allorigins.win/raw?url=', 'https://proxy.cors.sh/'];
+        async function safeFetch(url) {
+            for (var i = 0; i < PROXIES.length; i++) {
+                try {
+                    var r = await fetch(PROXIES[i] + encodeURIComponent(url), {
+                        signal: AbortSignal.timeout(9000)
+                    });
+                    if (!r.ok) continue;
+                    var t = await r.text();
+                    if (!t || !t.trim()) continue;
+                    try {
+                        return JSON.parse(t)
+                    } catch (e) {
+                        continue
+                    }
+                } catch (e) {
+                    continue
+                }
+            }
+            return null;
+        }
+
+        // STORE
+        var storeLoaded = false;
+
+        function storeTab(el, tab) {
+            document.querySelectorAll('#page-store .tab').forEach(function(t) {
+                t.classList.remove('active')
+            });
+            el.classList.add('active');
+            loadStore(tab);
+        }
+        async function loadStore(tab) {
+            var grid = document.getElementById('storeGrid');
+            grid.innerHTML = '';
+            for (var i = 0; i < 12; i++) {
+                var sk = document.createElement('div');
+                sk.className = 'game-tile';
+                sk.innerHTML = '<div class="skeleton" style="height:94px"></div><div style="padding:10px 12px"><div class="skeleton" style="height:10px;width:80%;margin-bottom:6px"></div><div class="skeleton" style="height:8px;width:50%"></div></div>';
+                grid.appendChild(sk);
+            }
+            var url = tab === 'featured' ? 'https://store.steampowered.com/api/featured/?cc=us&l=english' : 'https://store.steampowered.com/api/featuredcategories/?cc=us&l=english';
+            var data = await safeFetch(url);
+            grid.innerHTML = '';
+            var items = [];
+            if (data) {
+                if (tab === 'featured' && data.featured_win) items = data.featured_win.slice(0, 24);
+                else if (tab === 'topsellers' && data.top_sellers) items = data.top_sellers.items.slice(0, 24);
+                else if (tab === 'newreleases' && data.new_releases) items = data.new_releases.items.slice(0, 24);
+                else if (tab === 'specials' && data.specials) items = data.specials.items.slice(0, 24);
+                else if (data.featured_win) items = data.featured_win.slice(0, 24);
+            }
+            if (!items.length) {
+                grid.innerHTML = '<div class="empty-state"><div class="empty-icon">[no data]</div>Could not load store data</div>';
+                return
+            }
+            items.forEach(function(item) {
+                var tile = document.createElement('div');
+                tile.className = 'game-tile';
+                var img = item.large_capsule_image || item.header_image || item.tiny_image || '';
+                var price = item.final_price != null ? (item.final_price === 0 ? 'Free' : '$' + (item.final_price / 100).toFixed(2)) : 'N/A';
+                var disc = item.discount_percent > 0 ? '-' + item.discount_percent + '%' : '';
+                tile.innerHTML = (img ? '<img src="' + esc(img) + '" alt="" onerror="this.parentNode.querySelector(\'.game-tile-ph\') && (this.style.display=\'none\')">' : '') + '<div class="game-tile-ph" style="' + (img ? 'display:none' : '') + '">no image</div><div class="game-tile-info"><div class="game-tile-name">' + esc(item.name || 'Unknown') + '</div><div class="game-tile-meta">' + esc(price) + (disc ? ' ' + esc(disc) : '') + '</div></div>';
+                tile.addEventListener('click', function() {
+                    if (item.id || item.appid) {
+                        goTo('search');
+                        setTimeout(function() {
+                            loadGameById(item.id || item.appid)
+                        }, 100)
+                    }
+                });
+                grid.appendChild(tile);
+            });
+            storeLoaded = true;
+        }
+
+        // SEARCH
+        var searchMode = 'name';
+
+        function setSearchMode(m) {
+            searchMode = m;
+            document.getElementById('srchByName').classList.toggle('active', m === 'name');
+            document.getElementById('srchById').classList.toggle('active', m === 'id');
+            document.getElementById('srchInput').placeholder = m === 'id' ? 'Enter App ID (e.g. 730)...' : 'Search Steam games...';
+        }
+        async function doSearch() {
+            var q = document.getElementById('srchInput').value.trim();
+            if (!q) return;
+            var btn = document.getElementById('srchBtn'),
+                txt = document.getElementById('srchBtnTxt');
+            btn.disabled = true;
+            txt.innerHTML = '<span class="spin"></span>';
+            setSt('srchSt', 'Searching...', 'loading');
+            document.getElementById('srchDetail').innerHTML = '';
+            if (searchMode === 'id') {
+                await loadGameById(q, true);
+            } else {
+                var data = await safeFetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(q) + '&l=english&cc=US');
+                var items = (data && data.items) ? data.items : [];
+                renderSearchResults(items, 'srchResults', 'srchDetail');
+                setSt('srchSt', items.length ? 'Found ' + items.length + ' result' + (items.length !== 1 ? 's' : '') : 'No results', 'ok');
+            }
+            btn.disabled = false;
+            txt.textContent = 'Search';
+        }
+
+        function renderSearchResults(items, gridId, detailId) {
+            var rg = document.getElementById(gridId);
+            rg.innerHTML = '';
+            if (!items.length) {
+                rg.innerHTML = '<div class="empty-state"><div class="empty-icon">[empty]</div>No results found</div>';
+                return
+            }
+            items.forEach(function(item, i) {
+                var el = document.createElement('div');
+                el.className = 'sresult';
+                el.style.animationDelay = (i * 25) + 'ms';
+                el.innerHTML = (item.tiny_image ? '<img src="' + esc(item.tiny_image) + '" alt="">' : '<div class="sresult-ph">N/A</div>') + '<div class="sresult-info"><div class="sresult-name">' + esc(item.name) + '</div><div class="sresult-id">APP ' + item.id + '</div></div><div class="sresult-badge">' + item.id + '</div>';
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('#' + gridId + ' .sresult').forEach(function(r) {
+                        r.classList.remove('sel')
+                    });
+                    el.classList.add('sel');
+                    loadGameDetail(item, detailId);
+                });
+                rg.appendChild(el);
+            });
+        }
+        async function loadGameById(appId, showResults) {
+            var id = String(appId).trim();
+            if (!/^\d+$/.test(id)) {
+                setSt('srchSt', 'Invalid App ID', 'err');
+                return
+            }
+            var data = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + id + '&cc=us&l=english');
+            if (data && data[id] && data[id].success) {
+                var details = data[id].data;
+                var item = {
+                    id: parseInt(id),
+                    name: details.name,
+                    tiny_image: details.header_image
+                };
+                if (showResults) renderSearchResults([item], 'srchResults', 'srchDetail');
+                renderGameDetail(item, details, 'srchDetail');
+                setSt('srchSt', 'Found: ' + details.name, 'ok');
+            } else {
+                setSt('srchSt', 'App ID ' + id + ' not found', 'err')
+            }
+        }
+        async function loadGameDetail(item, targetId) {
+            var panel = document.getElementById(targetId);
+            panel.innerHTML = '<div class="detail-panel"><div style="text-align:center;padding:40px;color:var(--text3);font-family:var(--mono)"><span class="spin spin-l"></span><div style="margin-top:10px;font-size:11px">Loading...</div></div></div>';
+            panel.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+            var data = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + item.id + '&cc=us&l=english');
+            var details = (data && data[item.id] && data[item.id].data) ? data[item.id].data : null;
+            renderGameDetail(item, details, targetId);
+        }
+
+        function renderGameDetail(item, details, targetId) {
+            var appId = item.id;
+            var name = (details && details.name) ? details.name : item.name;
+            var dev = (details && details.developers) ? details.developers.join(', ') : 'Unknown';
+            var pub = (details && details.publishers) ? details.publishers.join(', ') : 'Unknown';
+            var rel = (details && details.release_date && details.release_date.date) ? details.release_date.date : 'Unknown';
+            var img = (details && details.header_image) ? details.header_image : (item.tiny_image || null);
+            var tags = (details && details.genres) ? details.genres.slice(0, 5).map(function(g) {
+                return '<span class="tag">' + esc(g.description) + '</span>'
+            }).join(' ') : '';
+            var price = (details && details.price_overview) ? details.price_overview.final_formatted : 'Free';
+            var desc = (details && details.short_description) ? details.short_description : '';
+            var panel = document.getElementById(targetId);
+            panel.innerHTML =
+                '<div class="detail-panel">' +
+                '<div class="detail-hero">' + (img ? '<img src="' + esc(img) + '" alt="">' : '') + '<div class="detail-hero-overlay"></div>' +
+                '<div class="detail-hero-content"><div class="detail-name">' + esc(name) + '</div><div>' + tags + '</div></div></div>' +
+                '<div class="detail-body">' +
+                '<div class="detail-meta-row"><span>App ID: <strong>' + appId + '</strong></span><span>Dev: <strong>' + esc(dev) + '</strong></span><span>Pub: <strong>' + esc(pub) + '</strong></span><span>Released: <strong>' + esc(rel) + '</strong></span><span>Price: <strong>' + esc(price) + '</strong></span><a href="https://store.steampowered.com/app/' + appId + '" target="_blank">Steam</a><a href="https://www.steamdb.info/app/' + appId + '" target="_blank">SteamDB</a></div>' +
+                (desc ? '<div style="font-size:12px;color:var(--text3);line-height:1.6;margin-bottom:16px">' + esc(desc) + '</div>' : '') +
+                '<div class="row">' +
+                '<button class="btn btn-ghost" onclick="goToGen(' + appId + ',' + JSON.stringify(name) + ')">[G] Generate</button>' +
+                '<button class="btn btn-ghost" onclick="goToPricing(' + appId + ')">[&#36;] Pricing</button>' +
+                '<button class="btn btn-ghost" onclick="goToPredict(' + appId + ')">[AI] Predict</button>' +
+                '<button class="btn btn-ghost" onclick="goToDepots(' + appId + ')">[D] Depots</button>' +
+                '</div></div></div>';
+        }
+
+        // PRICING
+        var REGIONS = [{
+            cc: 'us',
+            label: 'US'
+        }, {
+            cc: 'gb',
+            label: 'UK'
+        }, {
+            cc: 'eu',
+            label: 'EU'
+        }, {
+            cc: 'au',
+            label: 'AU'
+        }, {
+            cc: 'ca',
+            label: 'CA'
+        }, {
+            cc: 'br',
+            label: 'BR'
+        }, {
+            cc: 'ru',
+            label: 'RU'
+        }, {
+            cc: 'tr',
+            label: 'TR'
+        }, {
+            cc: 'ar',
+            label: 'AR'
+        }, {
+            cc: 'in',
+            label: 'IN'
+        }, {
+            cc: 'mx',
+            label: 'MX'
+        }, {
+            cc: 'cn',
+            label: 'CN'
+        }, {
+            cc: 'jp',
+            label: 'JP'
+        }, {
+            cc: 'kr',
+            label: 'KR'
+        }, {
+            cc: 'no',
+            label: 'NO'
+        }, {
+            cc: 'nz',
+            label: 'NZ'
+        }, {
+            cc: 'sg',
+            label: 'SG'
+        }, {
+            cc: 'za',
+            label: 'ZA'
+        }, {
+            cc: 'ua',
+            label: 'UA'
+        }, {
+            cc: 'ae',
+            label: 'AE'
+        }];
+        async function doPriceSearch() {
+            var q = document.getElementById('priceInput').value.trim();
+            if (!q) return;
+            var btn = document.getElementById('priceBtn'),
+                txt = document.getElementById('priceBtnTxt');
+            btn.disabled = true;
+            txt.innerHTML = '<span class="spin"></span>';
+            setSt('priceSt', 'Searching...', 'loading');
+            document.getElementById('priceResults').innerHTML = '';
+            var appId = null,
+                gameName = '';
+            if (/^\d+$/.test(q)) {
+                appId = q;
+                var d = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + q + '&cc=us&l=english');
+                if (d && d[q] && d[q].data) gameName = d[q].data.name;
+            } else {
+                var d = await safeFetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(q) + '&l=english&cc=US');
+                if (d && d.items && d.items[0]) {
+                    appId = d.items[0].id;
+                    gameName = d.items[0].name
+                }
+            }
+            if (!appId) {
+                setSt('priceSt', 'Game not found', 'err');
+                btn.disabled = false;
+                txt.textContent = 'Lookup';
+                return
+            }
+            setSt('priceSt', 'Fetching ' + REGIONS.length + ' regions...', 'loading');
+            var results = await Promise.all(REGIONS.map(function(r) {
+                return safeFetch('https://store.steampowered.com/api/appdetails?appids=' + appId + '&cc=' + r.cc + '&l=english').then(function(data) {
+                    var price = 'N/A',
+                        disc = '';
+                    if (data && data[appId] && data[appId].data) {
+                        var d2 = data[appId].data;
+                        if (d2.price_overview) {
+                            price = d2.price_overview.final_formatted || 'N/A';
+                            if (d2.price_overview.discount_percent > 0) disc = '-' + d2.price_overview.discount_percent + '%';
+                        } else if (d2.is_free) price = 'Free';
+                    }
+                    return {
+                        label: r.label,
+                        price: price,
+                        disc: disc
+                    };
+                }).catch(function() {
+                    return {
+                        label: r.label,
+                        price: 'N/A',
+                        disc: ''
+                    }
+                });
+            }));
+            setSt('priceSt', 'Prices loaded for ' + gameName, 'ok');
+            var html = '<div class="section-title mt16">' + esc(gameName) + ' (App ' + appId + ')</div><div class="price-grid">';
+            results.forEach(function(r) {
+                html += '<div class="price-item"><div class="price-country">' + esc(r.label) + '</div><div class="price-val">' + esc(r.price) + '</div>' + (r.disc ? '<div class="price-disc">' + esc(r.disc) + '</div>' : '') + '</div>';
+            });
+            html += '</div>';
+            document.getElementById('priceResults').innerHTML = html;
+            btn.disabled = false;
+            txt.textContent = 'Lookup';
+        }
+
+        function goToPricing(appId) {
+            goTo('pricing');
+            setTimeout(function() {
+                document.getElementById('priceInput').value = String(appId);
+                doPriceSearch();
+            }, 100)
+        }
+
+        // AI PREDICT
+        async function doPredictSearch() {
+            var q = document.getElementById('predictInput').value.trim();
+            if (!q) return;
+            var btn = document.getElementById('predictBtn'),
+                txt = document.getElementById('predictBtnTxt');
+            btn.disabled = true;
+            txt.innerHTML = '<span class="spin"></span>';
+            setSt('predictSt', 'Fetching game data...', 'loading');
+            document.getElementById('predictResults').innerHTML = '';
+            var appId = null;
+            if (/^\d+$/.test(q)) {
+                appId = q;
+            } else {
+                var s = await safeFetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(q) + '&l=english&cc=US');
+                if (s && s.items && s.items[0]) appId = s.items[0].id;
+            }
+            if (!appId) {
+                setSt('predictSt', 'Game not found', 'err');
+                btn.disabled = false;
+                txt.textContent = 'Analyze';
+                return
+            }
+            var d = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + appId + '&cc=us&l=english');
+            var details = (d && d[appId] && d[appId].data) ? d[appId].data : null;
+            if (!details) {
+                setSt('predictSt', 'Could not load data', 'err');
+                btn.disabled = false;
+                txt.textContent = 'Analyze';
+                return
+            }
+            setSt('predictSt', 'Running analysis...', 'loading');
+            await new Promise(function(r) {
+                setTimeout(r, 700)
+            });
+            renderPrediction(appId, details);
+            setSt('predictSt', 'Analysis complete - ' + details.name, 'ok');
+            btn.disabled = false;
+            txt.textContent = 'Analyze';
+        }
+
+        function renderPrediction(appId, details) {
+            var name = details.name || 'Unknown';
+            var price = details.price_overview ? details.price_overview.initial / 100 : 0;
+            var reviews = details.recommendations ? details.recommendations.total : 0;
+            var released = details.release_date ? new Date(details.release_date.date) : new Date();
+            var ageMonths = Math.max(0, (Date.now() - released.getTime()) / (1000 * 60 * 60 * 24 * 30));
+            var genres = (details.genres || []).map(function(g) {
+                return g.description
+            });
+            var saleLikelihood = Math.min(95, Math.max(10, (ageMonths > 24 ? 40 : ageMonths > 12 ? 28 : ageMonths > 6 ? 18 : 8) + (reviews > 10000 ? 25 : reviews > 1000 ? 18 : reviews > 100 ? 10 : 3) + (price > 29 ? 15 : price > 19 ? 10 : price > 9 ? 5 : 0) + (details.price_overview && details.price_overview.discount_percent > 0 ? 12 : 0)));
+            var discountDepth = Math.min(90, Math.max(5, (ageMonths > 24 ? 35 : ageMonths > 12 ? 25 : ageMonths > 6 ? 15 : 5) + (reviews > 50000 ? 20 : reviews > 10000 ? 15 : reviews > 1000 ? 8 : 2) + (price > 49 ? 20 : price > 29 ? 12 : price > 9 ? 6 : 0)));
+            var peakSeason = Math.min(90, Math.max(20, 55 + (genres.includes('Action') ? 10 : 0) + (genres.includes('RPG') ? 8 : 0) + (ageMonths > 6 ? 10 : 0) + (reviews > 1000 ? 8 : 0)));
+            var valueScore = Math.min(95, Math.max(15, (reviews > 50000 ? 35 : reviews > 10000 ? 28 : reviews > 1000 ? 20 : 10) + (price < 10 ? 25 : price < 20 ? 18 : price < 30 ? 12 : price < 60 ? 8 : 4) + (details.price_overview && details.price_overview.discount_percent > 0 ? 15 : 0)));
+            var verdict = saleLikelihood > 60 ? 'High probability of sale within 3 months' : saleLikelihood > 35 ? 'Possible sale within 6 months' : 'Unlikely on sale in near term';
+            var img = details.header_image || '';
+            var tags = (details.genres || []).slice(0, 4).map(function(g) {
+                return '<span class="tag">' + esc(g.description) + '</span>'
+            }).join(' ');
+            var html = '<div class="detail-panel">' +
+                '<div class="detail-hero">' + (img ? '<img src="' + esc(img) + '" alt="">' : '') + '<div class="detail-hero-overlay"></div>' +
+                '<div class="detail-hero-content"><div class="detail-name">' + esc(name) + '</div><div>' + tags + '</div></div></div>' +
+                '<div class="detail-body"><div class="section-title">AI Analysis Results</div><div class="grid-2">' +
+                '<div><div class="ai-panel">' +
+                '<div class="ai-label">Confidence Scores</div>' +
+                mkAiBar('Sale Likelihood', saleLikelihood) +
+                mkAiBar('Discount Depth', discountDepth) +
+                mkAiBar('Peak Season Match', peakSeason) +
+                mkAiBar('Value Score', valueScore) +
+                '<div class="ai-verdict"><strong>Verdict:</strong> ' + esc(verdict) + '. Based on ' + reviews.toLocaleString() + ' reviews, ~' + Math.round(ageMonths) + ' months old, base price $' + price.toFixed(2) + '.</div>' +
+                '</div></div>' +
+                '<div><div class="ai-panel">' +
+                '<div class="ai-label">Game Data</div>' +
+                mkDataRow('App ID', appId) +
+                mkDataRow('Base Price', '$' + price.toFixed(2) + (details.is_free ? ' (F2P)' : '')) +
+                mkDataRow('Reviews', reviews.toLocaleString()) +
+                mkDataRow('Age (months)', Math.round(ageMonths)) +
+                mkDataRow('Genres', genres.slice(0, 3).join(', ') || 'N/A') +
+                mkDataRow('Developer', (details.developers ? details.developers[0] : 'N/A')) +
+                '</div><div class="ai-panel mt12"><div class="ai-label">Price Trend (simulated)</div>' + mkMiniChart(appId, price) + '</div></div>' +
+                '</div></div></div>';
+            document.getElementById('predictResults').innerHTML = html;
+            setTimeout(function() {
+                document.querySelectorAll('.ai-bar-fill').forEach(function(b) {
+                    b.style.width = b.dataset.w + '%'
+                })
+            }, 100);
+        }
+
+        function mkAiBar(label, pct) {
+            return '<div class="ai-bar-wrap"><div class="ai-bar-label"><span>' + esc(label) + '</span><span>' + pct + '%</span></div><div class="ai-bar"><div class="ai-bar-fill" data-w="' + pct + '" style="width:0%"></div></div></div>'
+        }
+
+        function mkDataRow(label, val) {
+            return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border);font-family:var(--mono)"><span style="color:var(--text3)">' + esc(label) + '</span><span style="color:var(--text2)">' + esc(String(val)) + '</span></div>'
+        }
+
+        function mkMiniChart(appId, price) {
+            var months = ['J', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+            var seed = parseInt(String(appId).substring(0, 4)) || 1000;
+            var bars = '<div class="chart-wrap">';
+            for (var i = 0; i < 12; i++) {
+                var disc = ((seed * (i + 3)) % 3 === 0) ? Math.floor(20 + ((seed * (i + 7)) % 50)) : 0;
+                var h = Math.max(10, 60 - (disc / 100 * 36) + ((seed * (i + 1)) % 15) - 7);
+                var pShow = disc > 0 ? ('$' + (price * (1 - disc / 100)).toFixed(2) + ' (-' + disc + '%)') : '$' + price.toFixed(2);
+                bars += '<div class="chart-bar" style="height:' + h + 'px"><div class="chart-bar-tip">' + months[i] + ': ' + pShow + '</div></div>';
+            }
+            bars += '</div><div class="chart-labels">';
+            months.forEach(function(m) {
+                bars += '<div class="chart-label">' + m + '</div>'
+            });
+            return bars + '</div>';
+        }
+
+        function goToPredict(appId) {
+            goTo('predict');
+            setTimeout(function() {
+                document.getElementById('predictInput').value = String(appId);
+                doPredictSearch();
+            }, 100)
+        }
+
+        // GENERATOR
+        var genMode = 'name';
+
+        function setGenMode(m) {
+            genMode = m;
+            document.getElementById('genByName').classList.toggle('active', m === 'name');
+            document.getElementById('genById').classList.toggle('active', m === 'id');
+            document.getElementById('genInput').placeholder = m === 'id' ? 'Enter App ID (e.g. 730)...' : 'Search Steam games...';
+        }
+        async function doGenSearch() {
+            var q = document.getElementById('genInput').value.trim();
+            if (!q) return;
+            var btn = document.getElementById('genBtn'),
+                txt = document.getElementById('genBtnTxt');
+            btn.disabled = true;
+            txt.innerHTML = '<span class="spin"></span>';
+            setSt('genSt', 'Searching...', 'loading');
+            document.getElementById('genDetail').innerHTML = '';
+            if (genMode === 'id' || /^\d+$/.test(q)) {
+                var data = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + q + '&cc=us&l=english');
+                if (data && data[q] && data[q].data) {
+                    var det = data[q].data;
+                    renderGenResults([{
+                        id: parseInt(q),
+                        name: det.name,
+                        tiny_image: det.header_image
+                    }]);
+                    renderGenDetail({
+                        id: parseInt(q),
+                        name: det.name
+                    }, det);
+                    setSt('genSt', 'Found: ' + det.name, 'ok');
+                } else setSt('genSt', 'App ID not found', 'err');
+            } else {
+                var data = await safeFetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(q) + '&l=english&cc=US');
+                var items = (data && data.items) ? data.items : [];
+                renderGenResults(items);
+                setSt('genSt', items.length ? 'Found ' + items.length + ' results' : 'No results', 'ok');
+            }
+            btn.disabled = false;
+            txt.textContent = 'Search';
+        }
+
+        function renderGenResults(items) {
+            var rg = document.getElementById('genResults');
+            rg.innerHTML = '';
+            items.forEach(function(item, i) {
+                var el = document.createElement('div');
+                el.className = 'sresult';
+                el.style.animationDelay = (i * 22) + 'ms';
+                el.innerHTML = (item.tiny_image ? '<img src="' + esc(item.tiny_image) + '" alt="">' : '<div class="sresult-ph">N/A</div>') + '<div class="sresult-info"><div class="sresult-name">' + esc(item.name) + '</div><div class="sresult-id">APP ' + item.id + '</div></div><div class="sresult-badge">' + item.id + '</div>';
+                el.addEventListener('click', function() {
+                    document.querySelectorAll('#genResults .sresult').forEach(function(r) {
+                        r.classList.remove('sel')
+                    });
+                    el.classList.add('sel');
+                    loadGenDetail(item);
+                });
+                rg.appendChild(el);
+            });
+        }
+        async function loadGenDetail(item) {
+            var panel = document.getElementById('genDetail');
+            panel.innerHTML = '<div class="detail-panel"><div style="text-align:center;padding:36px;color:var(--text3);font-family:var(--mono);font-size:11px"><span class="spin spin-l"></span><div style="margin-top:10px">Loading...</div></div></div>';
+            panel.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
+            });
+            var data = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + item.id + '&cc=us&l=english');
+            var details = (data && data[item.id] && data[item.id].data) ? data[item.id].data : null;
+            renderGenDetail(item, details);
+        }
+
+        function renderGenDetail(item, details) {
+            var appId = item.id;
+            var name = (details && details.name) ? details.name : item.name;
+            var lua = mkLua(appId, details);
+            var acf = mkAcf(appId, name);
+            var img = (details && details.header_image) ? details.header_image : (item.tiny_image || null);
+            var tags = (details && details.genres) ? details.genres.slice(0, 4).map(function(g) {
+                return '<span class="tag">' + esc(g.description) + '</span>'
+            }).join(' ') : '';
+            var panel = document.getElementById('genDetail');
+            panel.innerHTML = '<div class="detail-panel">' +
+                '<div class="detail-hero">' + (img ? '<img src="' + esc(img) + '" alt="">' : '') + '<div class="detail-hero-overlay"></div>' +
+                '<div class="detail-hero-content"><div class="detail-name">' + esc(name) + '</div><div>' + tags + '</div></div></div>' +
+                '<div class="detail-body"><div class="section-title">Generated Files</div>' +
+                '<div class="file-grid">' +
+                '<div class="file-card"><div class="file-head"><span class="file-name">' + appId + '.txt</span><span class="file-badge">LUA</span></div><div class="file-body">' + hlLua(lua) + '</div></div>' +
+                '<div class="file-card"><div class="file-head"><span class="file-name">appmanifest_' + appId + '.acf</span><span class="file-badge">ACF</span></div><div class="file-body">' + hlAcf(acf) + '</div></div>' +
+                '</div>' +
+                '<div class="row mt16"><div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">' + appId + '.zip</strong> -- rename .txt to .lua after extracting</div><div class="spacer"></div>' +
+                '<button id="dlbtn_' + appId + '" class="btn">Download ZIP</button></div>' +
+                '</div></div>';
+            document.getElementById('dlbtn_' + appId).addEventListener('click', function() {
+                doDownload(appId, name, details)
+            });
+        }
+
+        function goToGen(appId, name) {
+            goTo('generator');
+            setTimeout(function() {
+                document.getElementById('genInput').value = String(appId);
+                doGenSearch();
+            }, 100)
+        }
+
+        // DEPOTS
+        async function doDepotSearch() {
+            var q = document.getElementById('depotInput').value.trim();
+            if (!q) return;
+            var btn = document.getElementById('depotBtn'),
+                txt = document.getElementById('depotBtnTxt');
+            btn.disabled = true;
+            txt.innerHTML = '<span class="spin"></span>';
+            setSt('depotSt', 'Loading...', 'loading');
+            document.getElementById('depotResults').innerHTML = '';
+            var appId = null;
+            if (/^\d+$/.test(q)) {
+                appId = q;
+            } else {
+                var s = await safeFetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(q) + '&l=english&cc=US');
+                if (s && s.items && s.items[0]) appId = s.items[0].id;
+            }
+            if (!appId) {
+                setSt('depotSt', 'Not found', 'err');
+                btn.disabled = false;
+                txt.textContent = 'Explore';
+                return
+            }
+            var data = await safeFetch('https://store.steampowered.com/api/appdetails?appids=' + appId + '&cc=us&l=english');
+            var details = (data && data[appId] && data[appId].data) ? data[appId].data : null;
+            if (!details) {
+                setSt('depotSt', 'Could not load depot data', 'err');
+                btn.disabled = false;
+                txt.textContent = 'Explore';
+                return
+            }
+            renderDepots(appId, details);
+            setSt('depotSt', 'Loaded: ' + details.name, 'ok');
+            btn.disabled = false;
+            txt.textContent = 'Explore';
+        }
+
+        function renderDepots(appId, details) {
+            var depots = details.depots || {};
+            var depotKeys = Object.keys(depots).filter(function(k) {
+                return /^\d+$/.test(k)
+            });
+            var branches = depots.branches || {};
+            var html = '<div class="section-title mt16">' + esc(details.name) + ' -- Depots (' + depotKeys.length + ')</div><div style="display:grid;gap:6px;margin-bottom:20px">';
+            if (!depotKeys.length) {
+                html += '<div class="empty-state"><div class="empty-icon">[no depots]</div>No depot data from API for this app</div>';
+            } else {
+                depotKeys.forEach(function(k) {
+                    var d = depots[k];
+                    var mfst = d.manifests && d.manifests.public ? (typeof d.manifests.public === 'object' ? d.manifests.public.gid : d.manifests.public) : 'N/A';
+                    var sz = d.maxsize ? Math.round(d.maxsize / 1073741824 * 10) / 10 + ' GB' : 'N/A';
+                    html += '<div class="depot-card"><div class="depot-id">Depot ' + k + (d.name ? ' -- ' + esc(d.name) : '') + '</div><div class="depot-meta">Manifest: ' + esc(String(mfst)) + '  |  Size: ' + esc(sz) + '</div></div>';
+                });
+            }
+            html += '</div><div class="section-title">Branches (' + Object.keys(branches).length + ')</div><div style="display:grid;gap:6px">';
+            if (!Object.keys(branches).length) {
+                html += '<div class="empty-state"><div class="empty-icon">[no branches]</div>No branch data available</div>';
+            } else {
+                Object.keys(branches).forEach(function(b) {
+                    var br = branches[b];
+                    var updated = br.timeupdated ? new Date(br.timeupdated * 1000).toLocaleDateString() : 'N/A';
+                    html += '<div class="depot-card"><div class="depot-id">' + esc(b) + '</div><div class="depot-meta">Build ID: ' + esc(String(br.buildid || 'N/A')) + '  |  Updated: ' + esc(updated) + (br.description ? '  |  ' + esc(br.description) : '') + '</div></div>';
+                });
+            }
+            html += '</div>';
+            document.getElementById('depotResults').innerHTML = html;
+        }
+
+        function goToDepots(appId) {
+            goTo('depots');
+            setTimeout(function() {
+                document.getElementById('depotInput').value = String(appId);
+                doDepotSearch();
+            }, 100)
+        }
+
+        // API BROWSER
+        async function runApi(endpoint) {
+            var appId = document.getElementById('apiAppId').value.trim() || '730';
+            document.getElementById('apiResponse').textContent = '// Loading...';
+            var url;
+            if (endpoint === 'appdetails') url = 'https://store.steampowered.com/api/appdetails?appids=' + appId + '&cc=us&l=english';
+            else if (endpoint === 'storesearch') url = 'https://store.steampowered.com/api/storesearch/?term=counter+strike&l=english&cc=US';
+            else if (endpoint === 'featured') url = 'https://store.steampowered.com/api/featured/?cc=us&l=english';
+            else if (endpoint === 'featuredcategories') url = 'https://store.steampowered.com/api/featuredcategories/?cc=us&l=english';
+            else if (endpoint === 'packagedetails') url = 'https://store.steampowered.com/api/packagedetails?packageids=' + appId;
+            var data = await safeFetch(url);
+            document.getElementById('apiResponse').textContent = data ? JSON.stringify(data, null, 2) : '// Failed to fetch response';
+        }
+        async function runCustomApi() {
+            var appId = document.getElementById('apiAppId').value.trim();
+            if (!appId) {
+                toast('Enter an App ID first', true);
+                return
+            }
+            runApi('appdetails')
+        }
+
+        // LUA / ACF
+        function mkLua(appId, details) {
+            var lines = ['-- ============================================', '--  Credits: skullaf', '--  Discord: skullaf_', '-- ============================================', '', 'addappid(' + appId + ')'];
+            if (details && details.depots) {
+                var keys = Object.keys(details.depots).filter(function(k) {
+                    return /^\d+$/.test(k)
+                });
+                keys.forEach(function(k) {
+                    var d = details.depots[k];
+                    if (d && d.manifests && d.manifests.public) {
+                        lines.push('addappid(' + k + ',0,"' + genHash(appId, k) + '")');
+                    } else if (d && d.dlcappid) {
+                        lines.push('addappid(' + k + ')');
+                    }
+                });
+            } else {
+                lines.push('addappid(' + (parseInt(appId) + 1) + ',0,"' + genHash(appId, parseInt(appId) + 1) + '")');
+                lines.push('addappid(' + (parseInt(appId) + 2) + ',0,"' + genHash(appId, parseInt(appId) + 2) + '")');
+            }
+            lines.push('');
+            return lines.join('\n');
+        }
+
+        function genHash(appId, depotId) {
+            var seed = String(appId) + String(depotId) + 'sf',
+                h = '',
+                c = '0123456789abcdef';
+            for (var i = 0; i < 64; i++) {
+                var x = seed.charCodeAt(i % seed.length) ^ (i * 31 + parseInt(appId)) ^ (parseInt(depotId) * 17);
+                h += c[Math.abs(x) % 16];
+            }
+            return h;
+        }
+
+        function mkAcf(appId, name) {
+            var ts = Math.floor(Date.now() / 1000),
+                build = Math.floor(10000000 + Math.random() * 89999999),
+                size = Math.floor(2147483648 + Math.random() * 5368709120),
+                mfst = Math.floor(1000000000000000 + Math.random() * 8000000000000000),
+                dir = String(name).replace(/[^a-zA-Z0-9 ]/g, '').trim().substring(0, 40);
+            return ['"AppState"', '{', '\t"appid"\t\t"' + appId + '"', '\t"Universe"\t\t"1"', '\t"name"\t\t"' + String(name).replace(/"/g, '\\"') + '"', '\t"StateFlags"\t\t"4"', '\t"installdir"\t\t"' + dir + '"', '\t"LastUpdated"\t\t"' + ts + '"', '\t"SizeOnDisk"\t\t"' + size + '"', '\t"StagingSize"\t\t"0"', '\t"buildid"\t\t"' + build + '"', '\t"LastOwner"\t\t"0"', '\t"UpdateResult"\t\t"0"', '\t"BytesToDownload"\t\t"0"', '\t"BytesDownloaded"\t\t"' + size + '"', '\t"BytesToStage"\t\t"0"', '\t"BytesStaged"\t\t"' + size + '"', '\t"TargetBuildID"\t\t"' + build + '"', '\t"AutoUpdateBehavior"\t\t"0"', '\t"AllowOtherDownloadsWhileRunning"\t\t"0"', '\t"ScheduledAutoUpdate"\t\t"0"', '\t"InstalledDepots"', '\t{', '\t\t"' + appId + '"', '\t\t{', '\t\t\t"manifest"\t\t"' + mfst + '"', '\t\t\t"size"\t\t"' + size + '"', '\t\t}', '\t}', '\t"UserConfig"', '\t{', '\t\t"language"\t\t"english"', '\t}', '\t"MountedConfig"', '\t{', '\t\t"language"\t\t"english"', '\t}', '}'].join('\n');
+        }
+
+        function hlLua(raw) {
+            var s = esc(raw);
+            s = s.replace(/(--[^\n]*)/g, '<span class="cm">$1</span>');
+            s = s.replace(/\b(addappid)\b/g, '<span class="fn">$1</span>');
+            s = s.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
+            s = s.replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+            return s;
+        }
+
+        function hlAcf(raw) {
+            var s = esc(raw);
+            s = s.replace(/^(\t*)"([^"]+)"(\t+)"([^"]*)"$/mg, function(m, ind, k, tab, v) {
+                return ind + '<span class="kw">"' + k + '"</span>' + tab + '<span class="str">"' + v + '"</span>';
+            });
+            return s;
+        }
+
+        // DOWNLOAD
+        function doDownload(appId, name, details) {
+            if (typeof JSZip === 'undefined') {
+                toast('JSZip not ready', true);
+                return
+            }
+            var lua = mkLua(appId, details),
+                acf = mkAcf(appId, name);
+            var zip = new JSZip(),
+                folder = zip.folder(String(appId));
+            folder.file(appId + '.txt', lua);
+            folder.file('appmanifest_' + appId + '.acf', acf);
+            zip.generateAsync({
+                type: 'blob',
+                compression: 'DEFLATE',
+                compressionOptions: {
+                    level: 6
+                }
+            }).then(function(blob) {
+                var url = URL.createObjectURL(blob),
+                    a = document.createElement('a');
+                a.href = url;
+                a.download = appId + '.zip';
+                a.style.cssText = 'position:fixed;top:-100px;left:-100px;opacity:0';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function() {
+                    try {
+                        document.body.removeChild(a)
+                    } catch (e) {}
+                    URL.revokeObjectURL(url)
+                }, 3000);
+                toast('Downloaded: ' + appId + '.zip');
+            }).catch(function(e) {
+                toast('ZIP error: ' + e.message, true)
+            });
+        }
+
+        // HOME SEARCH
+        async function homeSearch() {
+            var q = document.getElementById('homeSearchInput').value.trim();
+            if (!q) return;
+            var txt = document.getElementById('homeSearchTxt');
+            txt.innerHTML = '<span class="spin"></span>';
+            setSt('homeSt', 'Searching...', 'loading');
+            document.getElementById('homeResults').innerHTML = '';
+            var data = await safeFetch('https://store.steampowered.com/api/storesearch/?term=' + encodeURIComponent(q) + '&l=english&cc=US');
+            var items = (data && data.items) ? data.items.slice(0, 5) : [];
+            var rg = document.getElementById('homeResults');
+            if (!items.length) {
+                rg.innerHTML = '<div style="font-size:12px;color:var(--text3);font-family:var(--mono)">No results</div>';
+            } else {
+                items.forEach(function(item, i) {
+                    var el = document.createElement('div');
+                    el.className = 'sresult';
+                    el.style.animationDelay = (i * 20) + 'ms';
+                    el.innerHTML = (item.tiny_image ? '<img src="' + esc(item.tiny_image) + '" alt="" style="width:50px;height:28px;border-radius:3px;object-fit:cover;filter:grayscale(80%);border:1px solid var(--border);flex-shrink:0">' : '<div class="sresult-ph">N/A</div>') + '<div class="sresult-info"><div class="sresult-name" style="font-size:12px">' + esc(item.name) + '</div><div class="sresult-id">' + item.id + '</div></div><div class="sresult-badge">-&gt;</div>';
+                    el.addEventListener('click', function() {
+                        goTo('search');
+                        setTimeout(function() {
+                            document.getElementById('srchInput').value = item.name;
+                            doSearch();
+                        }, 80)
+                    });
+                    rg.appendChild(el);
+                });
+                setSt('homeSt', items.length + ' results', 'ok');
+            }
+            txt.textContent = 'Search';
+        }
+
+        // GLOBAL SEARCH
+        document.getElementById('globalSearch').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var q = this.value.trim();
+                if (!q) return;
+                goTo('search');
+                setTimeout(function() {
+                    document.getElementById('srchInput').value = q;
+                    doSearch()
+                }, 80);
+                this.value = ''
+            }
+        });
+        document.getElementById('homeSearchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') homeSearch()
+        });
+        document.getElementById('srchInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doSearch()
+        });
+        document.getElementById('priceInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doPriceSearch()
+        });
+        document.getElementById('predictInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doPredictSearch()
+        });
+        document.getElementById('genInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doGenSearch()
+        });
+        document.getElementById('depotInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') doDepotSearch()
+        });
+    </script>
+</body>
+
+</html>
