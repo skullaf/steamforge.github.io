@@ -2124,10 +2124,10 @@
                 '<div class="detail-hero-content"><div class="detail-name">' + esc(name) + '</div><div>' + tags + '</div></div></div>' +
                 '<div class="detail-body"><div class="section-title">Generated Files</div>' +
                 '<div class="file-grid">' +
-                '<div class="file-card"><div class="file-head"><span class="file-name">' + appId + '.txt</span><span class="file-badge">LUA</span></div><div class="file-body">' + hlLua(lua) + '</div></div>' +
+                '<div class="file-card"><div class="file-head"><span class="file-name">' + appId + '.lua</span><span class="file-badge">LUA</span></div><div class="file-body">' + hlLua(lua) + '</div></div>' +
                 '<div class="file-card"><div class="file-head"><span class="file-name">appmanifest_' + appId + '.acf</span><span class="file-badge">ACF</span></div><div class="file-body">' + hlAcf(acf) + '</div></div>' +
                 '</div>' +
-                '<div class="row mt16"><div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">' + appId + '.zip</strong> -- rename .txt to .lua after extracting</div><div class="spacer"></div>' +
+                '<div class="row mt16"><div style="font-size:11px;color:var(--text3)"><strong style="color:var(--text2)">' + appId + '.zip</strong> -- rename .lua to .lua after extracting</div><div class="spacer"></div>' +
                 '<button id="dlbtn_' + appId + '" class="btn">Download ZIP</button></div>' +
                 '</div></div>';
             document.getElementById('dlbtn_' + appId).addEventListener('click', function() {
@@ -2311,7 +2311,7 @@
                 acf = mkAcf(appId, name);
             var zip = new JSZip(),
                 folder = zip.folder(String(appId));
-            folder.file(appId + '.txt', lua);
+            folder.file(appId + '.lua', lua);
             folder.file('appmanifest_' + appId + '.acf', acf);
             zip.generateAsync({
                 type: 'blob',
@@ -2405,5 +2405,6 @@
         });
     </script>
 </body>
+
 
 </html>
