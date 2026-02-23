@@ -28,8 +28,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 /* CURSOR */
 @media(pointer:fine){body,button,a,[role=button],.nav-item,.game-card,.sresult,.card-sm,.screenshot-thumb,.copy-btn,.genre-chip,.category-card{cursor:none!important}}
-#sf-cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:difference;display:none;transform:translate(-50%,-50%)}
-#sf-cursor-ring{width:24px;height:24px;border:1.5px solid rgba(255,255,255,.8);border-radius:50%;transition:transform .18s ease,width .18s,height .18s}
+#sf-cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:difference;display:none;will-change:transform}
+#sf-cursor-ring{width:24px;height:24px;border:1.5px solid rgba(255,255,255,.8);border-radius:50%;transition:transform .18s ease,width .18s,height .18s;margin-top:-12px;margin-left:-12px}
 #sf-cursor-dot{position:absolute;top:50%;left:50%;width:3px;height:3px;background:#fff;border-radius:50%;transform:translate(-50%,-50%)}
 body.cursor-hover #sf-cursor-ring{width:36px;height:36px;border-color:rgba(255,255,255,.4)}
 body.cursor-click #sf-cursor-ring{transform:scale(.75)}
@@ -777,13 +777,13 @@ Chart.defaults.font.size = 10;
 // ═══ CURSOR ═══
 (function(){
   if(window.matchMedia('(pointer:coarse)').matches)return;
-  var cur=document.getElementById('sf-cursor');cur.style.display='block';
+  var cur=document.getElementById('sf-cursor');if(!cur)return;cur.style.display='block';
   var rx=0,ry=0,cx=0,cy=0;
   document.addEventListener('mousemove',function(e){rx=e.clientX;ry=e.clientY});
   document.addEventListener('mousedown',function(){document.body.classList.add('cursor-click')});
   document.addEventListener('mouseup',function(){document.body.classList.remove('cursor-click')});
   function lerp(a,b,t){return a+(b-a)*t}
-  function tick(){cx=lerp(cx,rx,.22);cy=lerp(cy,ry,.22);cur.style.transform='translate('+cx+'px,'+cy+'px)';requestAnimationFrame(tick)}
+  function tick(){cx=lerp(cx,rx,.22);cy=lerp(cy,ry,.22);cur.style.transform='translate('+Math.round(cx)+'px,'+Math.round(cy)+'px)';requestAnimationFrame(tick)}
   tick();
   new MutationObserver(function(){
     document.querySelectorAll('button:not([data-cur]),a:not([data-cur]),.game-card:not([data-cur]),.sresult:not([data-cur]),.genre-chip:not([data-cur]),.category-card:not([data-cur]),.top-seller-card:not([data-cur])').forEach(function(el){
@@ -1298,9 +1298,9 @@ function renderGameCharts(appId,details){
   var c2=document.createElement('div');c2.className='chart-card';c2.innerHTML='<div class="chart-title">Regional Price Distribution</div><div style="position:relative;height:160px"><canvas id="gc2"></canvas></div>';
   grid.appendChild(c2);
   setTimeout(function(){
-    gameChartInstances.push(new Chart(document.getElementById('gc1'),{type:'line',data:{labels:months,datasets:[{data:priceHistory,borderColor:'rgba(255,255,255,.5)',backgroundColor:'rgba(255,255,255,.04)',borderWidth:1.5,pointBackgroundColor:priceHistory.map(function(p){return p<price?'#6ddc8e':'rgba(255,255,255,.4)'}),pointRadius:4,fill:true,tension:0.3}]},options:Object.assign({},CHART_OPTS,{plugins:Object.assign({},CHART_OPTS.plugins,{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' $'+ctx.parsed.y.toFixed(2)}}}})})});
+    gameChartInstances.push(new Chart(document.getElementById('gc1'),{type:'line',data:{labels:months,datasets:[{data:priceHistory,borderColor:'rgba(255,255,255,.5)',backgroundColor:'rgba(255,255,255,.04)',borderWidth:1.5,pointBackgroundColor:priceHistory.map(function(p){return p<price?'#6ddc8e':'rgba(255,255,255,.4)'}),pointRadius:4,fill:true,tension:0.3}]},options:Object.assign({},CHART_OPTS,{plugins:Object.assign({},CHART_OPTS.plugins,{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' $'+ctx.parsed.y.toFixed(2)}}}})})}));
     var regPrices=[price*1,price*0.72,price*0.68,price*0.55,price*0.42,price*0.38,price*0.28,price*0.22].map(function(p){return+p.toFixed(2)});
-    gameChartInstances.push(new Chart(document.getElementById('gc2'),{type:'bar',data:{labels:['US','UK','EU','BR','TR','AR','IN','UA'],datasets:[{data:regPrices,backgroundColor:'rgba(255,255,255,.1)',borderColor:'rgba(255,255,255,.25)',borderWidth:1,borderRadius:3}]},options:Object.assign({},CHART_OPTS,{plugins:Object.assign({},CHART_OPTS.plugins,{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return' $'+ctx.parsed.y.toFixed(2)}}}})})});
+    gameChartInstances.push(new Chart(document.getElementById('gc2'),{type:'bar',data:{labels:['US','UK','EU','BR','TR','AR','IN','UA'],datasets:[{data:regPrices,backgroundColor:'rgba(255,255,255,.1)',borderColor:'rgba(255,255,255,.25)',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a1a1a',borderColor:'#2a2a2a',borderWidth:1,callbacks:{label:function(ctx){return' $'+ctx.parsed.y.toFixed(2)}}}},scales:{x:{ticks:{color:'#333',font:{size:9}},grid:{color:'#111'}},y:{ticks:{color:'#333',font:{size:9}},grid:{color:'#111'}}}}}));
   },50);
 }
 
@@ -1448,7 +1448,7 @@ function renderSteamXmlProfile(profile,games,baseUrl){
   var totalHours=games.reduce(function(a,g){return a+g.hoursOnRecord},0);var topGames=games.slice(0,6);
   var html='<div class="steam-connect-box" style="margin-bottom:14px"><div class="steam-profile-row">'+(profile.avatarMedium?'<img class="steam-avatar" src="'+esc(profile.avatarMedium)+'" alt="">':'')+'<div><div class="steam-profile-name">'+esc(profile.steamID||'Unknown')+'</div>'+(profile.realname?'<div style="font-size:11px;color:var(--text3);font-family:var(--mono)">'+esc(profile.realname)+'</div>':'')+' <div class="steam-profile-id">'+esc(profile.steamID64||'')+'</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">'+esc(profile.stateMessage||profile.onlineState||'')+(profile.location?' · '+esc(profile.location):'')+'</div></div><div class="spacer"></div><a href="'+esc(baseUrl)+'" target="_blank" class="btn btn-steam btn-sm">Open on Steam ↗</a></div>';
   html+='<div class="steam-stat-row"><div class="steam-stat"><div class="steam-stat-val">'+games.length.toLocaleString()+'</div><div class="steam-stat-lbl">Games</div></div><div class="steam-stat"><div class="steam-stat-val">'+Math.round(totalHours).toLocaleString()+'</div><div class="steam-stat-lbl">Hours</div></div>'+(profile.hoursPlayed2Wk&&profile.hoursPlayed2Wk!=='0.0'?'<div class="steam-stat"><div class="steam-stat-val">'+esc(profile.hoursPlayed2Wk)+'</div><div class="steam-stat-lbl">2-Wk Hrs</div></div>':'')+(profile.memberSince?'<div class="steam-stat"><div class="steam-stat-val" style="font-size:13px">'+esc(profile.memberSince)+'</div><div class="steam-stat-lbl">Member Since</div></div>':'')+'</div></div>';
-  if(topGames.length){html+='<div class="section-hdr"><div class="section-title">Most Played ('+games.length.toLocaleString()+' total)</div></div><div class="steam-library-grid">';topGames.forEach(function(g){html+='<div class="game-card" style="cursor:pointer" onclick="goTo(\'search\');setTimeout(function(){loadGameById('+esc(g.appid)+',true)},100)">'+(g.logo?'<img class="game-card-img" src="'+esc(g.logo)+'" alt="">':'<div class="game-card-ph">'+esc(g.appid)+'</div>')+'<div class="game-card-body"><div class="game-card-name">'+esc(g.name||'App '+g.appid)+'</div><div class="game-card-meta"><span>'+g.hoursOnRecord.toLocaleString()+'h played</span></div></div></div>'});html+='</div>'}
+  if(topGames.length){html+='<div class="section-hdr"><div class="section-title">Most Played ('+games.length.toLocaleString()+' total)</div></div><div class="steam-library-grid">';topGames.forEach(function(g){html+='<div class="game-card sf-lib-card" data-appid="'+esc(g.appid)+'" style="cursor:pointer">'+(g.logo?'<img class="game-card-img" src="'+esc(g.logo)+'" alt="">':'<div class="game-card-ph">'+esc(g.appid)+'</div>')+'<div class="game-card-body"><div class="game-card-name">'+esc(g.name||'App '+g.appid)+'</div><div class="game-card-meta"><span>'+g.hoursOnRecord.toLocaleString()+'h played</span></div></div></div>'});html+='</div>';setTimeout(function(){document.querySelectorAll('.sf-lib-card').forEach(function(c){c.addEventListener('click',function(){var aid=c.getAttribute('data-appid');goTo('search');setTimeout(function(){loadGameById(aid,true)},100)})})},50)}
   document.getElementById('steamProfile').innerHTML=html;
 }
 function renderSteamPrivate(profile,baseUrl){document.getElementById('steamProfile').innerHTML='<div class="steam-connect-box"><div class="steam-profile-name" style="margin-bottom:6px">Private Profile</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:12px;line-height:1.7">This profile is private. Set to Public in Steam settings to load data here.</div><a href="'+esc(baseUrl)+'" target="_blank" class="btn btn-steam btn-sm">View on Steam ↗</a></div>'}
