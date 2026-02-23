@@ -12,22 +12,59 @@
   --bg:#000;--bg2:#080808;--bg3:#0f0f0f;--bg4:#161616;--bg5:#1c1c1c;
   --border:#1a1a1a;--border2:#252525;--border3:#303030;
   --text:#e8e8e8;--text2:#777;--text3:#333;--text4:#222;--white:#fff;
-  --accent:#e8e8e8;--r:8px;--rs:5px;
+  --r:8px;--rs:5px;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif
 }
 html{scroll-behavior:smooth}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 #bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
-/* SIDEBAR */
+/* ── CUSTOM CURSOR (desktop only) ── */
+@media(pointer:fine){
+  body,button,a,[role=button],.nav-item,.game-tile,.sresult,.card-sm,.screenshot-thumb,.copy-btn{cursor:none!important}
+}
+#sf-cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:difference;display:none;transform:translate(-50%,-50%)}
+#sf-cursor-ring{width:26px;height:26px;border:1.5px solid rgba(255,255,255,.7);border-radius:50%;transition:transform .18s ease,border-color .15s,width .18s,height .18s}
+#sf-cursor-dot{position:absolute;top:50%;left:50%;width:4px;height:4px;background:#fff;border-radius:50%;transform:translate(-50%,-50%);transition:transform .1s}
+body.cursor-hover #sf-cursor-ring{width:38px;height:38px;border-color:rgba(255,255,255,.45)}
+body.cursor-click #sf-cursor-ring{transform:scale(.8)}
+body.cursor-click #sf-cursor-dot{transform:translate(-50%,-50%) scale(1.8)}
+@media(pointer:coarse){#sf-cursor{display:none!important}}
+
+/* ── MOBILE SIDEBAR OVERLAY ── */
+#mobileOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:98;backdrop-filter:blur(2px)}
+#mobileOverlay.open{display:block}
+#menuToggle{display:none;position:fixed;top:12px;left:12px;z-index:102;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rs);width:38px;height:38px;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:var(--text2);cursor:pointer}
+@media(max-width:768px){
+  #menuToggle{display:flex}
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;z-index:99}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0!important}
+  .topbar{padding:0 16px 0 56px!important}
+  .topbar-search{width:auto;flex:1}
+  .page{padding:18px!important}
+  .grid-4{grid-template-columns:repeat(2,1fr)!important}
+  .grid-2{grid-template-columns:1fr!important}
+  .grid-3{grid-template-columns:1fr!important}
+  .compare-hero-row{grid-template-columns:1fr!important}
+  .cmp-vs-badge{display:none}
+  .file-grid{grid-template-columns:1fr!important}
+  .sysreq-grid{grid-template-columns:1fr!important}
+  .detail-hero{height:120px!important}
+  .lightbox-prev{left:8px}
+  .lightbox-next{right:8px}
+  .topbar-right .topbar-badge:not(#clockBadge){display:none}
+}
+
+/* ── SHELL ── */
 .shell{display:flex;min-height:100vh;position:relative;z-index:1}
 .sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100}
 .sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .sidebar-logo-mark{width:28px;height:28px;background:#fff;border-radius:6px;display:grid;place-items:center;font-size:11px;color:#000;flex-shrink:0;font-family:var(--mono);font-weight:900;letter-spacing:-1px}
 .sidebar-logo-text{font-size:15px;font-weight:700;letter-spacing:-.4px;font-family:var(--mono)}
 .nav{flex:1;padding:12px 0;overflow-y:auto}
-.nav-section{padding:8px 16px 4px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:var(--mono)}
-.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:var(--text2);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:color .15s,background .15s;border-left:2px solid transparent;font-family:var(--sans)}
+.nav-section{padding:8px 16px 4px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;font-size:13px;color:var(--text2);border:none;background:none;width:100%;text-align:left;transition:color .15s,background .15s;border-left:2px solid transparent;font-family:var(--sans)}
 .nav-item:hover{color:var(--text);background:var(--bg3)}
 .nav-item.active{color:var(--white);background:var(--bg3);border-left-color:var(--white)}
 .ni{font-size:11px;width:18px;text-align:center;flex-shrink:0;font-family:var(--mono);font-weight:700;color:inherit}
@@ -37,42 +74,42 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .skullaf-link{font-weight:600;transition:color .25s,text-shadow .25s!important}
 .skullaf-link:hover{color:#fff!important;text-shadow:0 0 10px rgba(255,255,255,.5)!important}
 
-/* MAIN */
+/* ── MAIN ── */
 .main{margin-left:220px;flex:1;min-height:100vh}
-.topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg2);position:sticky;top:0;z-index:50}
-.topbar-title{font-size:13px;font-weight:600;color:var(--text2);font-family:var(--mono)}
-.topbar-search{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:6px 12px;width:280px;transition:border-color .18s}
+.topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:var(--bg2);position:sticky;top:0;z-index:50;gap:12px}
+.topbar-title{font-size:13px;font-weight:600;color:var(--text2);font-family:var(--mono);white-space:nowrap}
+.topbar-search{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:6px 12px;width:280px;transition:border-color .18s;flex:1;max-width:320px}
 .topbar-search:focus-within{border-color:var(--border3);box-shadow:0 0 0 3px rgba(255,255,255,.03)}
 .topbar-search input{background:none;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;width:100%}
 .topbar-search input::placeholder{color:var(--text3)}
-.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-right{display:flex;align-items:center;gap:12px;flex-shrink:0}
 .topbar-badge{font-size:10px;font-family:var(--mono);color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:3px 8px;cursor:default}
-.kb-hint{font-size:9px;font-family:var(--mono);color:var(--text4);padding:2px 6px;background:var(--bg4);border:1px solid var(--border);border-radius:3px}
 
-/* PAGES */
+/* ── PAGES ── */
 .page{display:none;padding:28px;animation:fadeUp .3s ease both}
 .page.active{display:block}
 .section-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);font-family:var(--mono)}
 .page-title{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
 .page-sub{font-size:13px;color:var(--text3);margin-bottom:24px}
 
-/* CARDS */
+/* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px}
 .card-sm{padding:14px 16px}
 
-/* GRIDS */
+/* ── GRIDS ── */
 .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-@media(max-width:960px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
+@media(max-width:960px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:680px){.grid-4{grid-template-columns:1fr 1fr}}
 
-/* STAT CARDS */
+/* ── STAT CARDS ── */
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px}
 .stat-label{font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;font-family:var(--mono)}
 .stat-value{font-size:26px;font-weight:700;letter-spacing:-.5px;font-family:var(--mono);margin-bottom:3px}
 .stat-sub{font-size:11px;color:var(--text3)}
 
-/* GAME TILES */
+/* ── GAME TILES ── */
 .game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .game-tile{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .12s}
 .game-tile:hover{border-color:var(--border3);transform:translateY(-2px)}
@@ -83,12 +120,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .game-tile-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
 .game-tile-meta{font-size:10px;color:var(--text3);font-family:var(--mono)}
 
-/* SEARCH RESULTS */
+/* ── SEARCH RESULTS ── */
 .sresult{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .15s,background .15s,transform .12s;animation:cardIn .25s ease both}
 .sresult:hover{border-color:var(--border2);background:var(--bg3);transform:translateY(-1px)}
 .sresult.sel{border-color:var(--border3);background:var(--bg3)}
 .sresult img{width:60px;height:34px;border-radius:4px;object-fit:cover;filter:grayscale(80%);border:1px solid var(--border);flex-shrink:0}
-
 .sresult-ph{width:60px;height:34px;border-radius:4px;background:var(--bg4);border:1px solid var(--border);display:grid;place-items:center;font-size:10px;flex-shrink:0;color:var(--text3);font-family:var(--mono)}
 .sresult-info{flex:1;min-width:0}
 .sresult-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -99,11 +135,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .star-btn:hover{opacity:.7;transform:scale(1.15)}
 .star-btn.fav{opacity:1}
 
-/* DETAIL PANEL */
+/* ── ADULT CONTENT GATE ── */
+.adult-gate{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:28px 24px;margin-top:14px;animation:fadeUp .22s ease both;text-align:center}
+.adult-gate-icon{font-size:32px;margin-bottom:12px;opacity:.5}
+.adult-gate-title{font-size:16px;font-weight:700;margin-bottom:6px;letter-spacing:-.3px}
+.adult-gate-sub{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:20px;line-height:1.6}
+.adult-gate-badge{display:inline-block;background:var(--bg4);border:1px solid var(--border2);border-radius:4px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:var(--mono);padding:3px 8px;margin-bottom:16px}
+.adult-gate-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+
+/* ── DETAIL PANEL ── */
 .detail-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-top:14px;animation:fadeUp .22s ease both}
 .detail-hero{position:relative;height:160px;background:var(--bg4);overflow:hidden}
 .detail-hero img{width:100%;height:100%;object-fit:cover;filter:grayscale(70%) brightness(.6)}
-
 .detail-hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.92) 0%,rgba(0,0,0,.45) 60%,transparent 100%)}
 .detail-hero-content{position:absolute;inset:0;padding:20px 24px;display:flex;flex-direction:column;justify-content:flex-end}
 .detail-name{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:6px}
@@ -113,13 +156,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .detail-meta-row a{color:var(--text2);text-decoration:none;border-bottom:1px solid var(--border2);transition:color .12s}
 .detail-meta-row a:hover{color:var(--text)}
 
-/* REVIEW METER */
+/* ── REVIEW METER ── */
 .review-meter{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .review-bar-wrap{flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
 .review-bar-fill{height:100%;border-radius:3px;background:#fff;transition:width 1s ease}
 .review-label{font-size:10px;font-family:var(--mono);color:var(--text2);white-space:nowrap}
 
-/* SCREENSHOTS */
+/* ── SCREENSHOTS ── */
 .screenshots-row{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
 .screenshots-row::-webkit-scrollbar{height:3px}
 .screenshots-row::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
@@ -128,19 +171,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .screenshot-thumb img{width:100%;height:100%;object-fit:cover;filter:grayscale(50%);transition:filter .2s}
 .screenshot-thumb:hover img{filter:grayscale(0%)}
 
-/* LIGHTBOX */
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9998;display:none;align-items:center;justify-content:center;animation:fadeIn .18s ease}
+/* ── LIGHTBOX ── */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:9998;display:none;align-items:center;justify-content:center}
 .lightbox.open{display:flex}
 .lightbox-img{max-width:90vw;max-height:85vh;border-radius:6px;border:1px solid var(--border2);box-shadow:0 30px 80px rgba(0,0,0,.9)}
-.lightbox-close{position:fixed;top:18px;right:22px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;font-family:var(--mono);transition:color .15s}
+.lightbox-close{position:fixed;top:18px;right:22px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;font-family:var(--mono);transition:color .15s;z-index:2}
 .lightbox-close:hover{color:#fff}
-.lightbox-nav{position:fixed;top:50%;transform:translateY(-50%);background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:16px;cursor:pointer;padding:10px 14px;border-radius:var(--rs);transition:background .15s,color .15s}
+.lightbox-nav{position:fixed;top:50%;transform:translateY(-50%);background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:16px;cursor:pointer;padding:10px 14px;border-radius:var(--rs);transition:background .15s,color .15s;z-index:2}
 .lightbox-nav:hover{background:var(--bg4);color:#fff}
 .lightbox-prev{left:18px}
 .lightbox-next{right:18px}
 .lightbox-counter{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:11px;color:var(--text3)}
 
-/* PRICING */
+/* ── PRICING ── */
 .price-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));gap:7px;margin-top:10px}
 .price-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px}
 .price-country{font-size:10px;color:var(--text3);font-family:var(--mono);margin-bottom:3px}
@@ -149,7 +192,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .price-item.cheapest{border-color:var(--border3);background:var(--bg4)}
 .price-item.cheapest .price-val{color:#fff}
 
-/* AI PANEL */
+/* ── AI PANEL ── */
 .ai-panel{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:14px;margin-top:10px}
 .ai-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;font-family:var(--mono)}
 .ai-bar-wrap{margin-bottom:9px}
@@ -158,7 +201,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .ai-bar-fill{height:100%;background:#fff;border-radius:2px;transition:width 1.1s ease}
 .ai-verdict{font-size:11px;color:var(--text2);line-height:1.65;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
 
-/* FILE GENERATOR */
+/* ── FILE GENERATOR ── */
 .file-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 @media(max-width:700px){.file-grid{grid-template-columns:1fr}}
 .file-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden}
@@ -173,36 +216,54 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .file-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 .kw{color:#ccc;font-weight:600}.str{color:#666}.num{color:#999}.cm{color:#2a2a2a}.fn{color:#aaa}
 
-/* COMPARE */
+/* ── COMPARE — FIXED ── */
 .compare-panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;animation:fadeUp .22s ease both;margin-top:14px}
-.compare-hero-row{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
-.compare-side{padding:0}
-.compare-hero-img{width:100%;height:100px;object-fit:cover;filter:grayscale(70%) brightness(.7);display:block}
-.compare-side-body{padding:14px 16px}
-.compare-stat-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:6px 0;border-bottom:1px solid var(--border);font-family:var(--mono)}
-.compare-stat-label{color:var(--text3)}
-.compare-stat-val{color:var(--text2);font-weight:600}
-.compare-stat-val.winner{color:#fff}
-.vs-divider{display:flex;align-items:center;justify-content:center;background:var(--bg3);border-left:1px solid var(--border);border-right:1px solid var(--border);writing-mode:initial;font-size:11px;color:var(--text3);font-family:var(--mono);padding:8px}
+.cmp-header-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;border-bottom:1px solid var(--border)}
+.cmp-header-side{display:flex;flex-direction:column}
+.cmp-header-hero{height:110px;overflow:hidden;position:relative}
+.cmp-header-hero img{width:100%;height:100%;object-fit:cover;filter:grayscale(70%) brightness(.65)}
+.cmp-header-info{padding:12px 16px;flex:1}
+.cmp-header-name{font-size:14px;font-weight:700;margin-bottom:3px;letter-spacing:-.2px}
+.cmp-header-id{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.cmp-vs-badge{display:flex;align-items:center;justify-content:center;padding:0 16px;background:var(--bg3);border-left:1px solid var(--border);border-right:1px solid var(--border);font-size:11px;font-weight:700;color:var(--text3);font-family:var(--mono);min-width:48px}
+.cmp-table{padding:16px 20px}
+.cmp-row{display:grid;grid-template-columns:1fr 120px 1fr;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px;font-family:var(--mono)}
+.cmp-row:last-child{border-bottom:none}
+.cmp-row-label{text-align:center;color:var(--text3);font-size:10px}
+.cmp-val-a{text-align:right;color:var(--text2);font-weight:600}
+.cmp-val-b{text-align:left;color:var(--text2);font-weight:600}
+.cmp-val-a.winner,.cmp-val-b.winner{color:#fff}
 
-/* FAVORITES */
+/* ── FAVORITES ── */
 .fav-empty{text-align:center;padding:60px 20px;color:var(--text3);font-size:12px;font-family:var(--mono)}
 .fav-empty-icon{font-size:28px;margin-bottom:12px;opacity:.2}
 
-/* RECENT SEARCHES */
+/* ── RECENT SEARCHES ── */
 .recent-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;margin-bottom:14px}
 .recent-chip{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:background .12s,color .12s,border-color .12s}
 .recent-chip:hover{background:var(--bg4);color:var(--text);border-color:var(--border2)}
 .recent-chip-x{margin-left:5px;color:var(--text3);transition:color .12s}
 .recent-chip:hover .recent-chip-x{color:var(--text2)}
 
-/* SYSTEM REQ */
+/* ── SYSTEM REQ ── */
 .sysreq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .sysreq-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px}
 .sysreq-title{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;font-family:var(--mono)}
 .sysreq-body{font-size:10px;color:var(--text3);line-height:1.8;font-family:var(--mono)}
 
-/* INPUTS */
+/* ── STEAM CONNECT ── */
+.steam-connect-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px}
+.steam-avatar{width:40px;height:40px;border-radius:6px;object-fit:cover;border:1px solid var(--border2);flex-shrink:0}
+.steam-profile-row{display:flex;align-items:center;gap:12px}
+.steam-profile-name{font-size:14px;font-weight:700;margin-bottom:2px}
+.steam-profile-id{font-size:10px;color:var(--text3);font-family:var(--mono)}
+.steam-stat-row{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.steam-stat{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;text-align:center;min-width:80px}
+.steam-stat-val{font-size:20px;font-weight:700;font-family:var(--mono);margin-bottom:2px}
+.steam-stat-lbl{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1px;text-transform:uppercase}
+.steam-library-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:12px}
+
+/* ── INPUTS ── */
 .input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .18s}
 .input:focus{border-color:var(--border3);box-shadow:0 0 0 3px rgba(255,255,255,.02)}
 .input::placeholder{color:var(--text3)}
@@ -210,7 +271,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .input-wrap .input{padding-left:30px}
 .input-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:11px;pointer-events:none;font-family:var(--mono)}
 
-/* BUTTONS */
+/* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#000;border:none;border-radius:var(--rs);padding:10px 18px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .15s,transform .1s}
 .btn:hover{opacity:.82}
 .btn:active{transform:scale(.97)}
@@ -219,19 +280,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .btn-ghost:hover{background:var(--bg4);color:var(--text);opacity:1}
 .btn-danger{background:var(--bg3);color:#555;border:1px solid var(--border)}
 .btn-danger:hover{color:#888;opacity:1}
+.btn-steam{background:#1b2838;color:#c7d5e0;border:1px solid #2a475e;font-family:var(--mono)}
+.btn-steam:hover{background:#2a475e;opacity:1;color:#fff}
 
-/* MODE TOGGLE */
+/* ── MODE TOGGLE ── */
 .mode-toggle{display:inline-flex;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:3px;gap:2px;margin-bottom:12px}
 .mode-btn{background:none;border:1px solid transparent;color:var(--text3);font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
 .mode-btn.active{background:var(--bg5);color:var(--text);border-color:var(--border2)}
 
-/* TABS */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px}
-.tab{background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s}
+/* ── TABS ── */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:20px;overflow-x:auto}
+.tab{background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:13px;font-weight:500;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s,border-color .15s;white-space:nowrap;flex-shrink:0}
 .tab:hover{color:var(--text2)}
 .tab.active{color:var(--text);border-bottom-color:var(--white)}
 
-/* STATUS */
+/* ── STATUS ── */
 .status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text3);min-height:18px;margin-top:8px;font-family:var(--mono)}
 .sdot{width:4px;height:4px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .25s}
 .status.loading .sdot{background:#555;animation:blink .85s infinite}
@@ -240,17 +303,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .status.err{color:#3a3a3a}
 .status.err .sdot{background:#3a3a3a}
 
-/* SPINNER */
+/* ── SPINNER ── */
 .spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(0,0,0,.15);border-top-color:#000;border-radius:50%;animation:rot .6s linear infinite;vertical-align:middle}
 .spin-l{border-color:rgba(255,255,255,.06);border-top-color:var(--text3)}
 
-/* TOAST */
+/* ── TOAST ── */
 .tc{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:5px;pointer-events:none}
 .toast{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);padding:9px 13px;font-size:11px;color:var(--text2);box-shadow:0 8px 30px rgba(0,0,0,.9);animation:fadeUp .18s ease both;transition:opacity .3s;font-family:var(--mono)}
 
-/* MISC */
+/* ── MISC ── */
 .tag{background:var(--bg4);border:1px solid var(--border);border-radius:3px;padding:2px 6px;font-size:10px;color:var(--text3);font-weight:500}
-.divider{height:1px;background:var(--border);margin:18px 0}
 .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .spacer{flex:1}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
@@ -258,7 +320,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .empty-state{text-align:center;padding:44px 20px;color:var(--text3);font-size:12px;font-family:var(--mono)}
 .empty-icon{font-size:10px;opacity:.3;margin-bottom:10px}
 
-/* CHART */
+/* ── CHART ── */
 .chart-wrap{display:flex;align-items:flex-end;gap:3px;height:72px;margin-top:8px}
 .chart-bar{flex:1;background:var(--bg4);border-radius:2px 2px 0 0;cursor:default;position:relative;transition:background .15s}
 .chart-bar:hover{background:var(--bg5)}
@@ -267,25 +329,25 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .chart-labels{display:flex;gap:3px;margin-top:3px}
 .chart-label{flex:1;font-size:8px;color:var(--text3);text-align:center;font-family:var(--mono)}
 
-/* DEPOT */
+/* ── DEPOT ── */
 .depot-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:11px 13px}
 .depot-id{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text2);margin-bottom:3px}
 .depot-meta{font-size:10px;color:var(--text3);font-family:var(--mono);line-height:1.6}
 
-/* SKELETON */
+/* ── SKELETON ── */
 .skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:3px}
 
-/* KEYBOARD SHORTCUT MODAL */
+/* ── KEYBOARD SHORTCUT MODAL ── */
 .kb-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9990;display:none;align-items:center;justify-content:center}
 .kb-modal.open{display:flex}
-.kb-modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:24px;min-width:320px;animation:fadeUp .18s ease both}
+.kb-modal-box{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:24px;min-width:300px;max-width:92vw;animation:fadeUp .18s ease both}
 .kb-modal-title{font-size:13px;font-weight:700;margin-bottom:16px;font-family:var(--mono);color:var(--text2)}
 .kb-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;font-family:var(--mono)}
 .kb-row:last-child{border-bottom:none}
 .kb-action{color:var(--text3)}
 .kb-key{background:var(--bg4);border:1px solid var(--border2);border-radius:3px;padding:2px 8px;font-size:10px;color:var(--text2)}
 
-/* ANIMATIONS */
+/* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes cardIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
@@ -297,6 +359,13 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 <body>
 <canvas id="bgCanvas"></canvas>
 <div class="tc" id="tc"></div>
+
+<!-- Custom cursor (hidden on touch devices via CSS) -->
+<div id="sf-cursor"><div id="sf-cursor-ring"></div><div id="sf-cursor-dot"></div></div>
+
+<!-- Mobile menu button & overlay -->
+<button id="menuToggle" onclick="toggleMobileSidebar()" aria-label="Menu">☰</button>
+<div id="mobileOverlay" onclick="closeMobileSidebar()"></div>
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
@@ -320,8 +389,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <div class="kb-row"><span class="kb-action">Generator</span><span class="kb-key">6</span></div>
     <div class="kb-row"><span class="kb-action">Favorites</span><span class="kb-key">7</span></div>
     <div class="kb-row"><span class="kb-action">Compare</span><span class="kb-key">8</span></div>
-    <div class="kb-row"><span class="kb-action">Depots</span><span class="kb-key">9</span></div>
-    <div class="kb-row"><span class="kb-action">Close modal / escape</span><span class="kb-key">Esc</span></div>
+    <div class="kb-row"><span class="kb-action">Steam Account</span><span class="kb-key">9</span></div>
+    <div class="kb-row"><span class="kb-action">Depots / API</span><span class="kb-key">0 / -</span></div>
+    <div class="kb-row"><span class="kb-action">Esc — close modals</span><span class="kb-key">Esc</span></div>
     <div class="kb-row"><span class="kb-action">This help</span><span class="kb-key">?</span></div>
     <div style="margin-top:14px;text-align:right"><button class="btn btn-ghost" onclick="closeKb()" style="font-size:11px;padding:6px 12px">Close</button></div>
   </div>
@@ -329,7 +399,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 
 <div class="shell">
 <!-- SIDEBAR -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
     <div class="sidebar-logo-mark">SF</div>
     <div class="sidebar-logo-text">SteamForge</div>
@@ -346,6 +416,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <button class="nav-item" onclick="goTo('compare')"><span class="ni">[C]</span> Compare</button>
     <div class="nav-section" style="margin-top:8px">Library</div>
     <button class="nav-item" onclick="goTo('favorites')"><span class="ni">[★]</span> Favorites <span class="nav-badge" id="favBadge">0</span></button>
+    <button class="nav-item" onclick="goTo('steam')"><span class="ni">[♦]</span> Steam Account</button>
     <div class="nav-section" style="margin-top:8px">Data</div>
     <button class="nav-item" onclick="goTo('depots')"><span class="ni">[D]</span> Depots</button>
     <button class="nav-item" onclick="goTo('api')"><span class="ni">[/]</span> API Browser</button>
@@ -374,19 +445,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <!-- HOME -->
   <div class="page active" id="page-home">
     <div class="page-title">Overview</div>
-    <div class="page-sub">Steam API platform -- search, analyze, generate</div>
+    <div class="page-sub">Steam API platform — search, analyze, generate</div>
     <div class="grid-4 mb12">
       <div class="stat-card"><div class="stat-label">Total Games</div><div class="stat-value">150K+</div><div class="stat-sub">on Steam store</div></div>
       <div class="stat-card"><div class="stat-label">Regions</div><div class="stat-value">20+</div><div class="stat-sub">price regions</div></div>
       <div class="stat-card"><div class="stat-label">Favorites</div><div class="stat-value" id="homeFavCount">0</div><div class="stat-sub">saved games</div></div>
-      <div class="stat-card"><div class="stat-label">Generator</div><div class="stat-value">v2.0</div><div class="stat-sub">lua + manifest</div></div>
+      <div class="stat-card"><div class="stat-label">Generator</div><div class="stat-value">v4.0</div><div class="stat-sub">lua + manifest</div></div>
     </div>
     <div class="grid-2">
       <div>
         <div class="section-title">Quick Search</div>
         <div id="recentSearchWrap"></div>
         <div class="input-wrap mb8"><span class="input-icon">/s</span><input class="input" type="text" id="homeSearchInput" placeholder="Search a game..." autocomplete="off"></div>
-        <div style="display:flex;gap:8px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn" onclick="homeSearch()"><span id="homeSearchTxt">Search</span></button>
           <button class="btn btn-ghost" onclick="goTo('compare')">[C] Compare</button>
           <button class="btn btn-ghost" onclick="goTo('generator')">[G] Generator</button>
@@ -401,7 +472,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
           <div class="card card-sm" style="cursor:pointer" onclick="goTo('pricing')"><div style="font-size:13px;font-weight:700;margin-bottom:2px">[$] Pricing Lookup</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Compare prices across 20+ global regions</div></div>
           <div class="card card-sm" style="cursor:pointer" onclick="goTo('predict')"><div style="font-size:13px;font-weight:700;margin-bottom:2px">[AI] Price Prediction</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Predict sale likelihood and discount depth</div></div>
           <div class="card card-sm" style="cursor:pointer" onclick="goTo('compare')"><div style="font-size:13px;font-weight:700;margin-bottom:2px">[C] Game Compare</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Compare two games side by side</div></div>
-          <div class="card card-sm" style="cursor:pointer" onclick="goTo('generator')"><div style="font-size:13px;font-weight:700;margin-bottom:2px">[G] File Generator</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">Generate Lua scripts and ACF manifests</div></div>
+          <div class="card card-sm" style="cursor:pointer" onclick="goTo('steam')"><div style="font-size:13px;font-weight:700;margin-bottom:2px">[♦] Steam Account</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono)">View your profile, library and stats</div></div>
         </div>
       </div>
     </div>
@@ -452,7 +523,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   <!-- AI PREDICT -->
   <div class="page" id="page-predict">
     <div class="page-title">AI Prediction</div>
-    <div class="page-sub">Predict sale likelihood, discount depth and trends using game metadata</div>
+    <div class="page-sub">Predict sale likelihood, discount depth and trends</div>
     <div style="display:flex;gap:8px;margin-bottom:8px">
       <div class="input-wrap" style="flex:1"><span class="input-icon">AI</span><input class="input" type="text" id="predictInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
       <button class="btn" id="predictBtn" onclick="doPredictSearch()"><span id="predictBtnTxt">Analyze</span></button>
@@ -520,6 +591,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
     <div id="favDetail"></div>
   </div>
 
+  <!-- STEAM ACCOUNT -->
+  <div class="page" id="page-steam">
+    <div class="page-title">Steam Account</div>
+    <div class="page-sub">View your public Steam profile and library</div>
+    <div class="steam-connect-box" id="steamConnectBox">
+      <div class="section-title">Connect via Steam ID</div>
+      <div style="font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:12px;line-height:1.7">Enter your Steam ID64 or custom URL name to view your public profile, friends list and library. Your Steam ID64 is a 17-digit number found at <a href="https://steamid.io" target="_blank" style="color:var(--text2)">steamid.io</a>.</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div class="input-wrap" style="flex:1"><span class="input-icon">♦</span><input class="input" type="text" id="steamIdInput" placeholder="Steam ID64 (e.g. 76561198xxxxxxxxx)" autocomplete="off"></div>
+        <button class="btn btn-steam" id="steamConnectBtn" onclick="connectSteam()"><span id="steamConnectTxt">Load Profile</span></button>
+      </div>
+      <div class="status" id="steamSt"><div class="sdot"></div><span id="steamStTxt">Enter your Steam ID64</span></div>
+    </div>
+    <div id="steamProfile"></div>
+  </div>
+
   <!-- DEPOTS -->
   <div class="page" id="page-depots">
     <div class="page-title">Depot Explorer</div>
@@ -553,10 +640,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
         </div>
       </div>
       <div>
-        <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
-          <span>Response</span>
-          <button class="copy-btn" onclick="copyApiResponse()">copy</button>
-        </div>
+        <div class="section-title" style="display:flex;align-items:center;justify-content:space-between"><span>Response</span><button class="copy-btn" onclick="copyApiResponse()">copy</button></div>
         <div id="apiResponse" class="card" style="font-family:var(--mono);font-size:10px;color:var(--text3);line-height:1.7;max-height:500px;overflow-y:auto;white-space:pre-wrap;word-break:break-all">// Select an endpoint to see the raw API response</div>
       </div>
     </div>
@@ -566,6 +650,51 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════
+//  CUSTOM CURSOR (desktop / pointer:fine only)
+// ═══════════════════════════════════════════════════════
+(function(){
+  var isTouch=window.matchMedia('(pointer:coarse)').matches;
+  if(isTouch)return;
+  var cur=document.getElementById('sf-cursor');
+  cur.style.display='block';
+  var rx=window.innerWidth/2,ry=window.innerHeight/2,cx=rx,cy=ry,raf;
+  document.addEventListener('mousemove',function(e){rx=e.clientX;ry=e.clientY});
+  document.addEventListener('mousedown',function(){document.body.classList.add('cursor-click')});
+  document.addEventListener('mouseup',function(){document.body.classList.remove('cursor-click')});
+  document.querySelectorAll('button,a,.nav-item,.game-tile,.sresult,.card-sm,.screenshot-thumb').forEach(function(el){
+    el.addEventListener('mouseenter',function(){document.body.classList.add('cursor-hover')});
+    el.addEventListener('mouseleave',function(){document.body.classList.remove('cursor-hover')});
+  });
+  function lerp(a,b,t){return a+(b-a)*t}
+  function tick(){
+    cx=lerp(cx,rx,.22);cy=lerp(cy,ry,.22);
+    cur.style.transform='translate('+cx+'px,'+cy+'px)';
+    raf=requestAnimationFrame(tick);
+  }
+  tick();
+  // Observe new interactive elements added dynamically
+  new MutationObserver(function(){
+    document.querySelectorAll('button:not([data-cur]),a:not([data-cur]),.nav-item:not([data-cur]),.game-tile:not([data-cur]),.sresult:not([data-cur])').forEach(function(el){
+      el.setAttribute('data-cur','1');
+      el.addEventListener('mouseenter',function(){document.body.classList.add('cursor-hover')});
+      el.addEventListener('mouseleave',function(){document.body.classList.remove('cursor-hover')});
+    });
+  }).observe(document.body,{childList:true,subtree:true});
+})();
+
+// ═══════════════════════════════════════════════════════
+//  MOBILE SIDEBAR
+// ═══════════════════════════════════════════════════════
+function toggleMobileSidebar(){
+  var sb=document.getElementById('sidebar'),ov=document.getElementById('mobileOverlay');
+  sb.classList.toggle('open');ov.classList.toggle('open');
+}
+function closeMobileSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+}
+
 // ═══════════════════════════════════════════════════════
 //  BACKGROUND PARTICLES
 // ═══════════════════════════════════════════════════════
@@ -607,24 +736,55 @@ setInterval(updateClock,1000);updateClock();
 //  HELPERS
 // ═══════════════════════════════════════════════════════
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
-
 function toast(msg,isErr){
   var c=document.getElementById('tc'),d=document.createElement('div');
-  d.className='toast';d.textContent=(isErr?'err: ':'ok: ')+msg;
+  d.className='toast';d.textContent=(isErr?'✗ ':'✓ ')+msg;
   c.appendChild(d);
   setTimeout(function(){d.style.opacity='0';setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},320)},3200);
 }
-
 function setSt(id,txt,cls){
   var el=document.getElementById(id);if(!el)return;
   el.className='status '+(cls||'');
   var sp=el.querySelector('span');if(sp)sp.textContent=txt;
 }
-
 function stripHtml(s){return s?s.replace(/<[^>]+>/g,''):''}
+function copyText(txt,msg){
+  navigator.clipboard.writeText(txt).then(function(){toast(msg||'Copied!')}).catch(function(){
+    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;top:-9999px;left:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'Copied!')}catch(e){toast('Copy failed',true)}document.body.removeChild(ta);
+  });
+}
 
 // ═══════════════════════════════════════════════════════
-//  FAVORITES (localStorage)
+//  ADULT CONTENT GATE
+// ═══════════════════════════════════════════════════════
+var ADULT_WORDS=['sex','porn','hentai','erotic','adult','nude','naked','xxx','nsfw','18+','ecchi','lewd','fetish','lingerie','strip','bikini girls','lust','erotica','playboy','bordel'];
+var adultApproved={};
+function isAdultContent(name,genres){
+  var n=(name||'').toLowerCase();
+  if(ADULT_WORDS.some(function(w){return n.includes(w)}))return true;
+  if(genres&&genres.some(function(g){var gd=(g.description||g||'').toLowerCase();return gd.includes('adult')||gd.includes('sexual')||gd.includes('nudity')}))return true;
+  return false;
+}
+function showAdultGate(name,targetId,onConfirm){
+  var panel=document.getElementById(targetId);
+  var safeDiv=document.createElement('div');safeDiv.className='adult-gate';
+  safeDiv.innerHTML=
+    '<div class="adult-gate-icon">⚠</div>'+
+    '<div class="adult-gate-badge">18+ Content</div>'+
+    '<div class="adult-gate-title">Adult Content Warning</div>'+
+    '<div class="adult-gate-sub">This game — <strong style="color:var(--text2)">'+esc(name)+'</strong> — may contain mature or adult-rated content including nudity, sexual themes, or explicit material.<br>Do you want to continue viewing this game?</div>'+
+    '<div class="adult-gate-btns">'+
+    '<button class="btn" id="adultYes_'+targetId+'">Yes, show me</button>'+
+    '<button class="btn btn-ghost" id="adultNo_'+targetId+'">No, go back</button>'+
+    '</div>';
+  panel.innerHTML='';panel.appendChild(safeDiv);
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('adultYes_'+targetId).addEventListener('click',function(){adultApproved[name]=true;onConfirm()});
+  document.getElementById('adultNo_'+targetId).addEventListener('click',function(){panel.innerHTML='';});
+}
+
+// ═══════════════════════════════════════════════════════
+//  FAVORITES
 // ═══════════════════════════════════════════════════════
 function getFavs(){try{return JSON.parse(localStorage.getItem('sf_favs')||'[]')}catch(e){return[]}}
 function saveFavs(a){try{localStorage.setItem('sf_favs',JSON.stringify(a))}catch(e){}}
@@ -659,7 +819,7 @@ function renderFavPage(){
 updateFavCount();
 
 // ═══════════════════════════════════════════════════════
-//  RECENT SEARCHES (localStorage)
+//  RECENT SEARCHES
 // ═══════════════════════════════════════════════════════
 function getRecent(){try{return JSON.parse(localStorage.getItem('sf_recent')||'[]')}catch(e){return[]}}
 function addRecent(q){if(!q||!q.trim())return;var r=getRecent().filter(function(x){return x!==q}).slice(0,9);r.unshift(q);try{localStorage.setItem('sf_recent',JSON.stringify(r))}catch(e){}renderRecentChips()}
@@ -683,9 +843,8 @@ renderRecentChips();
 // ═══════════════════════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════════════════════
-var pageNames={home:'overview',store:'store',search:'search',pricing:'pricing',predict:'ai prediction',generator:'generator',compare:'compare',favorites:'favorites',depots:'depot explorer',api:'api browser'};
+var pageNames={home:'overview',store:'store',search:'search',pricing:'pricing',predict:'ai prediction',generator:'generator',compare:'compare',favorites:'favorites',steam:'steam account',depots:'depot explorer',api:'api browser'};
 var storeCurrentTab='featured';var storeLoaded=false;
-
 function goTo(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active')});
@@ -694,6 +853,7 @@ function goTo(id){
   document.getElementById('topbarTitle').textContent=pageNames[id]||id;
   if(id==='store'&&!storeLoaded)loadStore(storeCurrentTab);
   if(id==='favorites')renderFavPage();
+  closeMobileSidebar();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -704,16 +864,16 @@ function closeKb(){document.getElementById('kbModal').classList.remove('open')}
 document.addEventListener('keydown',function(e){
   var tag=document.activeElement&&document.activeElement.tagName;
   var typing=tag==='INPUT'||tag==='TEXTAREA';
-  if(e.key==='Escape'){closeKb();closeLightbox();return}
+  if(e.key==='Escape'){closeKb();closeLightbox();closeMobileSidebar();return}
   if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('globalSearch').focus();return}
   if(typing)return;
-  var navMap={'1':'home','2':'store','3':'search','4':'pricing','5':'predict','6':'generator','7':'favorites','8':'compare','9':'depots','0':'api'};
+  var navMap={'1':'home','2':'store','3':'search','4':'pricing','5':'predict','6':'generator','7':'favorites','8':'compare','9':'steam','0':'depots','-':'api'};
   if(navMap[e.key]){goTo(navMap[e.key]);return}
   if(e.key==='?'){openKb()}
 });
 
 // ═══════════════════════════════════════════════════════
-//  SAFE FETCH (with multiple CORS proxies)
+//  SAFE FETCH
 // ═══════════════════════════════════════════════════════
 var PROXIES=['https://corsproxy.io/?','https://api.allorigins.win/raw?url=','https://proxy.cors.sh/'];
 async function safeFetch(url){
@@ -733,18 +893,9 @@ async function safeFetch(url){
 //  LIGHTBOX
 // ═══════════════════════════════════════════════════════
 var lbImages=[],lbIndex=0;
-function openLightbox(imgs,idx){
-  lbImages=imgs;lbIndex=idx||0;
-  document.getElementById('lbImg').src=lbImages[lbIndex];
-  document.getElementById('lbCounter').textContent=(lbIndex+1)+' / '+lbImages.length;
-  document.getElementById('lightbox').classList.add('open');
-}
+function openLightbox(imgs,idx){lbImages=imgs;lbIndex=idx||0;document.getElementById('lbImg').src=lbImages[lbIndex];document.getElementById('lbCounter').textContent=(lbIndex+1)+' / '+lbImages.length;document.getElementById('lightbox').classList.add('open')}
 function closeLightbox(){document.getElementById('lightbox').classList.remove('open')}
-function lbNav(dir){
-  lbIndex=(lbIndex+dir+lbImages.length)%lbImages.length;
-  document.getElementById('lbImg').src=lbImages[lbIndex];
-  document.getElementById('lbCounter').textContent=(lbIndex+1)+' / '+lbImages.length;
-}
+function lbNav(dir){lbIndex=(lbIndex+dir+lbImages.length)%lbImages.length;document.getElementById('lbImg').src=lbImages[lbIndex];document.getElementById('lbCounter').textContent=(lbIndex+1)+' / '+lbImages.length}
 document.getElementById('lbClose').onclick=closeLightbox;
 document.getElementById('lbPrev').onclick=function(){lbNav(-1)};
 document.getElementById('lbNext').onclick=function(){lbNav(1)};
@@ -755,13 +906,11 @@ document.getElementById('lightbox').addEventListener('click',function(e){if(e.ta
 // ═══════════════════════════════════════════════════════
 function storeTab(el,tab){
   document.querySelectorAll('#page-store .tab').forEach(function(t){t.classList.remove('active')});
-  el.classList.add('active');
-  storeCurrentTab=tab;storeLoaded=false;
-  loadStore(tab);
+  el.classList.add('active');storeCurrentTab=tab;storeLoaded=false;loadStore(tab);
 }
 async function loadStore(tab){
   var grid=document.getElementById('storeGrid');grid.innerHTML='';
-  for(var i=0;i<12;i++){var sk=document.createElement('div');sk.className='game-tile';sk.innerHTML='<div class="skeleton" style="height:90px"></div><div style="padding:10px 12px"><div class="skeleton" style="height:10px;width:80%;margin-bottom:5px"></div><div class="skeleton" style="height:8px;width:50%"></div></div>';grid.appendChild(sk)}
+  for(var i=0;i<12;i++){var sk=document.createElement('div');sk.className='game-tile';sk.innerHTML='<div class="skeleton" style="height:94px"></div><div style="padding:10px 12px"><div class="skeleton" style="height:10px;width:80%;margin-bottom:5px"></div><div class="skeleton" style="height:8px;width:50%"></div></div>';grid.appendChild(sk)}
   var url=tab==='featured'?'https://store.steampowered.com/api/featured/?cc=us&l=english':'https://store.steampowered.com/api/featuredcategories/?cc=us&l=english';
   var data=await safeFetch(url);grid.innerHTML='';var items=[];
   if(data){
@@ -777,7 +926,7 @@ async function loadStore(tab){
     var img=item.large_capsule_image||item.header_image||item.tiny_image||'';
     var price=item.final_price!=null?(item.final_price===0?'Free':'$'+(item.final_price/100).toFixed(2)):'N/A';
     var disc=item.discount_percent>0?'-'+item.discount_percent+'%':'';
-    tile.innerHTML=(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="game-tile-ph" style="'+(img?'display:none':'')+'">no image</div><div class="game-tile-info"><div class="game-tile-name">'+esc(item.name||'Unknown')+'</div><div class="game-tile-meta">'+esc(price)+(disc?' '+esc(disc):'')+' <span style="color:var(--text4)">APP '+(item.id||item.appid||'')+'</span></div></div>';
+    tile.innerHTML=(img?'<img src="'+esc(img)+'" alt="">':'<div class="game-tile-ph">no image</div>')+'<div class="game-tile-info"><div class="game-tile-name">'+esc(item.name||'Unknown')+'</div><div class="game-tile-meta">'+esc(price)+(disc?' '+esc(disc):'')+' <span style="color:var(--text4)">APP '+(item.id||item.appid||'')+'</span></div></div>';
     tile.addEventListener('click',function(){if(item.id||item.appid){goTo('search');setTimeout(function(){loadGameById(item.id||item.appid,true)},100)}});
     grid.appendChild(tile);
   });
@@ -821,10 +970,19 @@ function renderSearchResults(items,gridId,detailId){
     el.querySelector('.star-btn').addEventListener('click',function(e){e.stopPropagation();toggleFav(item.id,item.name,item.tiny_image)});
     el.addEventListener('click',function(){
       document.querySelectorAll('#'+gridId+' .sresult').forEach(function(r){r.classList.remove('sel')});
-      el.classList.add('sel');loadGameDetail(item,detailId);
+      el.classList.add('sel');
+      maybeLoadGameDetail(item,detailId);
     });
     rg.appendChild(el);
   });
+}
+
+function maybeLoadGameDetail(item,targetId){
+  if(adultApproved[item.name]||!isAdultContent(item.name,[])){
+    loadGameDetail(item,targetId);
+  }else{
+    showAdultGate(item.name,targetId,function(){loadGameDetail(item,targetId)});
+  }
 }
 
 async function loadGameById(appId,showResults){
@@ -836,9 +994,14 @@ async function loadGameById(appId,showResults){
     var details=data[id].data;
     var item={id:parseInt(id),name:details.name,tiny_image:details.header_image};
     if(showResults)renderSearchResults([item],'srchResults','srchDetail');
-    renderGameDetail(item,details,'srchDetail');
+    var genres=(details.genres||[]);
+    if(adultApproved[details.name]||!isAdultContent(details.name,genres)){
+      renderGameDetail(item,details,'srchDetail');
+    }else{
+      showAdultGate(details.name,'srchDetail',function(){renderGameDetail(item,details,'srchDetail')});
+    }
     setSt('srchSt','Found: '+details.name,'ok');
-  }else{setSt('srchSt','App ID '+id+' not found — it may not exist or CORS proxy failed','err')}
+  }else{setSt('srchSt','App ID '+id+' not found','err')}
 }
 
 async function loadGameDetail(item,targetId){
@@ -847,11 +1010,16 @@ async function loadGameDetail(item,targetId){
   panel.scrollIntoView({behavior:'smooth',block:'nearest'});
   var data=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+item.id+'&cc=us&l=english');
   var details=(data&&data[item.id]&&data[item.id].data)?data[item.id].data:null;
-  renderGameDetail(item,details,targetId);
+  var genres=details?details.genres:[];
+  if(details&&isAdultContent(details.name,genres)&&!adultApproved[details.name]){
+    showAdultGate(details.name,targetId,function(){renderGameDetail(item,details,targetId)});
+  }else{
+    renderGameDetail(item,details,targetId);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
-//  GAME DETAIL — fixed: no inline onclick with name string
+//  GAME DETAIL
 // ═══════════════════════════════════════════════════════
 function renderGameDetail(item,details,targetId){
   var appId=item.id;
@@ -861,31 +1029,25 @@ function renderGameDetail(item,details,targetId){
   var rel=(details&&details.release_date&&details.release_date.date)?details.release_date.date:'Unknown';
   var img=(details&&details.header_image)?details.header_image:(item.tiny_image||null);
   var tags=(details&&details.genres)?details.genres.slice(0,5).map(function(g){return'<span class="tag">'+esc(g.description)+'</span>'}).join(' '):'';
-  var price=(details&&details.price_overview)?details.price_overview.final_formatted:'Free';
+  var price=(details&&details.price_overview)?details.price_overview.final_formatted:(details&&details.is_free?'Free':'N/A');
   var desc=(details&&details.short_description)?stripHtml(details.short_description):'';
   var reviews=(details&&details.recommendations)?details.recommendations.total:0;
-  var reviewScore=0;
-  // compute rough positive % from review count heuristic or just show count
   var screenshots=(details&&details.screenshots)?details.screenshots.slice(0,10):[];
-  var minReq=(details&&details.pc_requirements&&details.pc_requirements.minimum)?stripHtml(details.pc_requirements.minimum):'N/A';
-  var recReq=(details&&details.pc_requirements&&details.pc_requirements.recommended)?stripHtml(details.pc_requirements.recommended):'N/A';
+  var minReq=(details&&details.pc_requirements&&details.pc_requirements.minimum)?stripHtml(details.pc_requirements.minimum):'';
+  var recReq=(details&&details.pc_requirements&&details.pc_requirements.recommended)?stripHtml(details.pc_requirements.recommended):'';
+  var metacritic=(details&&details.metacritic)?details.metacritic.score:'';
   var favd=isFav(appId);
   var panel=document.getElementById(targetId);
 
   var screenshotHtml='';
-  if(screenshots.length){
-    screenshotHtml='<div style="margin-bottom:14px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Screenshots</div><div class="screenshots-row" id="ssRow_'+appId+'"></div></div>';
-  }
-
+  if(screenshots.length){screenshotHtml='<div style="margin-bottom:14px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">Screenshots</div><div class="screenshots-row" id="ssRow_'+appId+'"></div></div>'}
   var sysReqHtml='';
-  if(minReq!=='N/A'||recReq!=='N/A'){
-    sysReqHtml='<div style="margin-top:14px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">System Requirements</div><div class="sysreq-grid"><div class="sysreq-box"><div class="sysreq-title">Minimum</div><div class="sysreq-body">'+esc(minReq)+'</div></div><div class="sysreq-box"><div class="sysreq-title">Recommended</div><div class="sysreq-body">'+esc(recReq)+'</div></div></div></div>';
-  }
+  if(minReq||recReq){sysReqHtml='<div style="margin-top:14px"><div style="font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">System Requirements</div><div class="sysreq-grid"><div class="sysreq-box"><div class="sysreq-title">Minimum</div><div class="sysreq-body">'+esc(minReq||'N/A')+'</div></div><div class="sysreq-box"><div class="sysreq-title">Recommended</div><div class="sysreq-body">'+esc(recReq||'N/A')+'</div></div></div></div>'}
 
   panel.innerHTML=
     '<div class="detail-panel">'+
     '<div class="detail-hero">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="detail-hero-overlay"></div>'+
-    '<div class="detail-hero-content"><div class="detail-name">'+esc(name)+'</div><div>'+tags+'</div></div></div>'+
+    '<div class="detail-hero-content"><div class="detail-name">'+esc(name)+'</div><div>'+tags+(metacritic?'<span class="tag" style="margin-left:6px;color:var(--text2)">MC: '+metacritic+'</span>':'')+'</div></div></div>'+
     '<div class="detail-body">'+
     '<div class="detail-meta-row">'+
     '<span>App ID: <strong>'+appId+'</strong></span>'+
@@ -905,32 +1067,17 @@ function renderGameDetail(item,details,targetId){
     '<button class="btn btn-ghost" id="btnPredict_'+appId+'">[AI] Predict</button>'+
     '<button class="btn btn-ghost" id="btnDepot_'+appId+'">[D] Depots</button>'+
     '<button class="btn btn-ghost" id="btnCmp_'+appId+'">[C] Compare</button>'+
-    '<button class="btn btn-ghost star-btn'+(favd?' fav':'')+'" id="btnFav_'+appId+'" data-id="'+appId+'" style="font-size:16px;padding:8px 12px" title="'+(favd?'Remove from':'Add to')+' favorites">★</button>'+
+    '<button class="btn btn-ghost star-btn'+(favd?' fav':'')+'" id="btnFav_'+appId+'" data-id="'+appId+'" style="font-size:16px;padding:8px 12px">★</button>'+
     '</div>'+
     sysReqHtml+
     '</div></div>';
 
-  // Animate review bar
-  if(reviews>0){
-    setTimeout(function(){
-      var bar=document.getElementById('rvBar_'+appId);
-      if(bar){var pct=Math.min(100,Math.round((reviews/(reviews+500))*100+20));bar.style.width=pct+'%'}
-    },120);
-  }
-
-  // Screenshots
+  if(reviews>0){setTimeout(function(){var bar=document.getElementById('rvBar_'+appId);if(bar){bar.style.width=Math.min(100,Math.round((reviews/(reviews+500))*100+20))+'%'}},120)}
   if(screenshots.length){
     var ssRow=document.getElementById('ssRow_'+appId);
     var imgUrls=screenshots.map(function(s){return s.path_full||s.path_thumbnail});
-    screenshots.forEach(function(s,idx){
-      var thumb=document.createElement('div');thumb.className='screenshot-thumb';
-      thumb.innerHTML='<img src="'+esc(s.path_thumbnail||s.path_full)+'" alt="">';
-      thumb.addEventListener('click',function(){openLightbox(imgUrls,idx)});
-      if(ssRow)ssRow.appendChild(thumb);
-    });
+    screenshots.forEach(function(s,idx){var thumb=document.createElement('div');thumb.className='screenshot-thumb';thumb.innerHTML='<img src="'+esc(s.path_thumbnail||s.path_full)+'" alt="">';thumb.addEventListener('click',function(){openLightbox(imgUrls,idx)});if(ssRow)ssRow.appendChild(thumb)});
   }
-
-  // Listeners — no inline onclick avoids apostrophe/quote crash
   document.getElementById('btnGen_'+appId).addEventListener('click',function(){goToGen(appId,name)});
   document.getElementById('btnPrice_'+appId).addEventListener('click',function(){goToPricing(appId)});
   document.getElementById('btnPredict_'+appId).addEventListener('click',function(){goToPredict(appId)});
@@ -942,22 +1089,15 @@ function renderGameDetail(item,details,targetId){
 // ═══════════════════════════════════════════════════════
 //  PRICING
 // ═══════════════════════════════════════════════════════
-var REGIONS=[{cc:'us',label:'US'},{cc:'gb',label:'UK'},{cc:'eu',label:'EU'},{cc:'au',label:'AU'},{cc:'ca',label:'CA'},{cc:'br',label:'BR'},{cc:'ru',label:'RU'},{cc:'tr',label:'TR'},{cc:'ar',label:'AR'},{cc:'in',label:'IN'},{cc:'mx',label:'MX'},{cc:'cn',label:'CN'},{cc:'jp',label:'JP'},{cc:'kr',label:'KR'},{cc:'no',label:'NO'},{cc:'nz',label:'NZ'},{cc:'sg',label:'SG'},{cc:'za',label:'ZA'},{cc:'ua',label:'UA'},{cc:'ae',label:'AE'}];
-
+var REGIONS=[{cc:'us',label:'US 🇺🇸'},{cc:'gb',label:'UK 🇬🇧'},{cc:'eu',label:'EU 🇪🇺'},{cc:'au',label:'AU 🇦🇺'},{cc:'ca',label:'CA 🇨🇦'},{cc:'br',label:'BR 🇧🇷'},{cc:'ru',label:'RU 🇷🇺'},{cc:'tr',label:'TR 🇹🇷'},{cc:'ar',label:'AR 🇦🇷'},{cc:'in',label:'IN 🇮🇳'},{cc:'mx',label:'MX 🇲🇽'},{cc:'cn',label:'CN 🇨🇳'},{cc:'jp',label:'JP 🇯🇵'},{cc:'kr',label:'KR 🇰🇷'},{cc:'no',label:'NO 🇳🇴'},{cc:'nz',label:'NZ 🇳🇿'},{cc:'sg',label:'SG 🇸🇬'},{cc:'za',label:'ZA 🇿🇦'},{cc:'ua',label:'UA 🇺🇦'},{cc:'ae',label:'AE 🇦🇪'}];
 async function doPriceSearch(){
   var q=document.getElementById('priceInput').value.trim();if(!q)return;
   var btn=document.getElementById('priceBtn'),txt=document.getElementById('priceBtnTxt');
   btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
   setSt('priceSt','Searching...','loading');document.getElementById('priceResults').innerHTML='';
   var appId=null,gameName='';
-  if(/^\d+$/.test(q)){
-    appId=q;
-    var d=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+q+'&cc=us&l=english');
-    if(d&&d[q]&&d[q].data)gameName=d[q].data.name;
-  }else{
-    var d=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');
-    if(d&&d.items&&d.items[0]){appId=d.items[0].id;gameName=d.items[0].name}
-  }
+  if(/^\d+$/.test(q)){appId=q;var d=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+q+'&cc=us&l=english');if(d&&d[q]&&d[q].data)gameName=d[q].data.name}
+  else{var d=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');if(d&&d.items&&d.items[0]){appId=d.items[0].id;gameName=d.items[0].name}}
   if(!appId){setSt('priceSt','Game not found','err');btn.disabled=false;txt.textContent='Lookup';return}
   setSt('priceSt','Fetching '+REGIONS.length+' regions...','loading');
   var results=await Promise.all(REGIONS.map(function(r){
@@ -968,14 +1108,10 @@ async function doPriceSearch(){
     }).catch(function(){return{label:r.label,price:'N/A',disc:'',raw:null}});
   }));
   setSt('priceSt','Loaded '+results.filter(function(r){return r.price!=='N/A'}).length+' regions for '+gameName,'ok');
-  // find cheapest valid price
   var validRaw=results.filter(function(r){return r.raw!=null&&r.raw>0}).map(function(r){return r.raw});
   var cheapestRaw=validRaw.length?Math.min.apply(null,validRaw):null;
   var html='<div class="section-title mt16">'+esc(gameName)+' (App '+appId+')</div><div class="price-grid">';
-  results.forEach(function(r){
-    var isCheapest=cheapestRaw!=null&&r.raw===cheapestRaw;
-    html+='<div class="price-item'+(isCheapest?' cheapest':'')+'"><div class="price-country">'+esc(r.label)+(isCheapest?' ↓ cheapest':'')+' </div><div class="price-val">'+esc(r.price)+'</div>'+(r.disc?'<div class="price-disc">'+esc(r.disc)+'</div>':'')+' </div>';
-  });
+  results.forEach(function(r){var isCheapest=cheapestRaw!=null&&r.raw===cheapestRaw;html+='<div class="price-item'+(isCheapest?' cheapest':'')+'"><div class="price-country">'+esc(r.label)+(isCheapest?' ↓':'')+' </div><div class="price-val">'+esc(r.price)+'</div>'+(r.disc?'<div class="price-disc">'+esc(r.disc)+'</div>':'')+'</div>'});
   html+='</div>';document.getElementById('priceResults').innerHTML=html;
   btn.disabled=false;txt.textContent='Lookup';
 }
@@ -990,8 +1126,7 @@ async function doPredictSearch(){
   btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
   setSt('predictSt','Fetching game data...','loading');document.getElementById('predictResults').innerHTML='';
   var appId=null;
-  if(/^\d+$/.test(q)){appId=q}
-  else{var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');if(s&&s.items&&s.items[0])appId=s.items[0].id}
+  if(/^\d+$/.test(q)){appId=q}else{var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');if(s&&s.items&&s.items[0])appId=s.items[0].id}
   if(!appId){setSt('predictSt','Game not found','err');btn.disabled=false;txt.textContent='Analyze';return}
   var d=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+appId+'&cc=us&l=english');
   var details=(d&&d[appId]&&d[appId].data)?d[appId].data:null;
@@ -1002,7 +1137,6 @@ async function doPredictSearch(){
   setSt('predictSt','Analysis complete — '+details.name,'ok');
   btn.disabled=false;txt.textContent='Analyze';
 }
-
 function renderPrediction(appId,details){
   var name=details.name||'Unknown';
   var price=details.price_overview?details.price_overview.initial/100:0;
@@ -1017,22 +1151,16 @@ function renderPrediction(appId,details){
   var verdict=saleLikelihood>60?'High probability of sale within 3 months':saleLikelihood>35?'Possible sale in the next 3–6 months':'Unlikely on sale in the near term';
   var img=details.header_image||'';
   var tags=(details.genres||[]).slice(0,4).map(function(g){return'<span class="tag">'+esc(g.description)+'</span>'}).join(' ');
-  var html=
+  document.getElementById('predictResults').innerHTML=
     '<div class="detail-panel">'+
-    '<div class="detail-hero">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="detail-hero-overlay"></div>'+
-    '<div class="detail-hero-content"><div class="detail-name">'+esc(name)+'</div><div>'+tags+'</div></div></div>'+
+    '<div class="detail-hero">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="detail-hero-overlay"></div><div class="detail-hero-content"><div class="detail-name">'+esc(name)+'</div><div>'+tags+'</div></div></div>'+
     '<div class="detail-body"><div class="section-title">AI Analysis Results</div><div class="grid-2">'+
-    '<div><div class="ai-panel">'+
-    '<div class="ai-label">Confidence Scores</div>'+
+    '<div><div class="ai-panel"><div class="ai-label">Confidence Scores</div>'+
     mkAiBar('Sale Likelihood',saleLikelihood)+mkAiBar('Discount Depth',discountDepth)+mkAiBar('Peak Season Match',peakSeason)+mkAiBar('Value Score',valueScore)+
-    '<div class="ai-verdict"><strong>Verdict:</strong> '+esc(verdict)+'. Based on '+reviews.toLocaleString()+' reviews, ~'+Math.round(ageMonths)+' months old, base price $'+price.toFixed(2)+'.</div>'+
-    '</div></div>'+
-    '<div><div class="ai-panel">'+
-    '<div class="ai-label">Game Data</div>'+
+    '<div class="ai-verdict"><strong>Verdict:</strong> '+esc(verdict)+'. Based on '+reviews.toLocaleString()+' reviews, ~'+Math.round(ageMonths)+' months old, base price $'+price.toFixed(2)+'.</div></div></div>'+
+    '<div><div class="ai-panel"><div class="ai-label">Game Data</div>'+
     mkDataRow('App ID',appId)+mkDataRow('Base Price','$'+price.toFixed(2)+(details.is_free?' (F2P)':''))+mkDataRow('Reviews',reviews.toLocaleString())+mkDataRow('Age (months)',Math.round(ageMonths))+mkDataRow('Genres',genres.slice(0,3).join(', ')||'N/A')+mkDataRow('Developer',details.developers?details.developers[0]:'N/A')+
-    '</div><div class="ai-panel mt12"><div class="ai-label">Price Trend (simulated)</div>'+mkMiniChart(appId,price)+'</div></div>'+
-    '</div></div></div>';
-  document.getElementById('predictResults').innerHTML=html;
+    '</div><div class="ai-panel mt12"><div class="ai-label">Price Trend (simulated)</div>'+mkMiniChart(appId,price)+'</div></div></div></div></div>';
   setTimeout(function(){document.querySelectorAll('.ai-bar-fill').forEach(function(b){b.style.width=b.dataset.w+'%'})},100);
 }
 function mkAiBar(label,pct){return'<div class="ai-bar-wrap"><div class="ai-bar-label"><span>'+esc(label)+'</span><span>'+pct+'%</span></div><div class="ai-bar"><div class="ai-bar-fill" data-w="'+pct+'" style="width:0%"></div></div></div>'}
@@ -1041,18 +1169,13 @@ function mkMiniChart(appId,price){
   var months=['J','F','M','A','M','J','J','A','S','O','N','D'];
   var seed=parseInt(String(appId).substring(0,4))||1000;
   var bars='<div class="chart-wrap">';
-  for(var i=0;i<12;i++){
-    var disc=((seed*(i+3))%3===0)?Math.floor(20+((seed*(i+7))%50)):0;
-    var h=Math.max(10,60-(disc/100*36)+((seed*(i+1))%15)-7);
-    var pShow=disc>0?('$'+(price*(1-disc/100)).toFixed(2)+' (-'+disc+'%)'):'$'+price.toFixed(2);
-    bars+='<div class="chart-bar" style="height:'+h+'px"><div class="chart-bar-tip">'+months[i]+': '+pShow+'</div></div>';
-  }
+  for(var i=0;i<12;i++){var disc=((seed*(i+3))%3===0)?Math.floor(20+((seed*(i+7))%50)):0;var h=Math.max(10,60-(disc/100*36)+((seed*(i+1))%15)-7);var pShow=disc>0?('$'+(price*(1-disc/100)).toFixed(2)+' (-'+disc+'%)'):'$'+price.toFixed(2);bars+='<div class="chart-bar" style="height:'+h+'px"><div class="chart-bar-tip">'+months[i]+': '+pShow+'</div></div>'}
   bars+='</div><div class="chart-labels">';months.forEach(function(m){bars+='<div class="chart-label">'+m+'</div>'});return bars+'</div>';
 }
 function goToPredict(appId){goTo('predict');setTimeout(function(){document.getElementById('predictInput').value=String(appId);doPredictSearch()},100)}
 
 // ═══════════════════════════════════════════════════════
-//  COMPARE
+//  COMPARE — FIXED UI
 // ═══════════════════════════════════════════════════════
 var cmpData={A:null,B:null};
 async function doCmpSearch(side){
@@ -1068,87 +1191,163 @@ async function doCmpSearch(side){
   items.forEach(function(item,i){
     var el=document.createElement('div');el.className='sresult';el.style.animationDelay=(i*18)+'ms';
     el.innerHTML=(item.tiny_image?'<img src="'+esc(item.tiny_image)+'" alt="">':'<div class="sresult-ph">N/A</div>')+'<div class="sresult-info"><div class="sresult-name">'+esc(item.name)+'</div><div class="sresult-id">APP '+item.id+'</div></div><div class="sresult-badge">select</div>';
-    el.addEventListener('click',function(){
-      document.querySelectorAll('#cmpResults'+side+' .sresult').forEach(function(r){r.classList.remove('sel')});el.classList.add('sel');
-      selectCmpGame(side,item);
-    });
+    el.addEventListener('click',function(){document.querySelectorAll('#cmpResults'+side+' .sresult').forEach(function(r){r.classList.remove('sel')});el.classList.add('sel');selectCmpGame(side,item)});
     rg.appendChild(el);
   });
-  setSt('cmpSt'+side,'Select a game','ok');btn.disabled=false;txt.textContent='Find';
+  setSt('cmpSt'+side,'Select a game above','ok');btn.disabled=false;txt.textContent='Find';
 }
-
 function selectCmpGame(side,item){
-  cmpData[side]=item;setSt('cmpSt'+side,'Selected: '+item.name,'ok');
+  cmpData[side]=item;setSt('cmpSt'+side,'✓ '+item.name,'ok');
   if(cmpData.A&&cmpData.B)document.getElementById('cmpRunBtn').disabled=false;
 }
-
 async function runCompare(){
   var panel=document.getElementById('comparePanel');
   panel.innerHTML='<div style="text-align:center;padding:36px;color:var(--text3);font-family:var(--mono)"><span class="spin spin-l"></span><div style="margin-top:9px;font-size:10px">Fetching both games...</div></div>';
   panel.scrollIntoView({behavior:'smooth',block:'nearest'});
-  var [dA,dB]=await Promise.all([
+  var results=await Promise.all([
     safeFetch('https://store.steampowered.com/api/appdetails?appids='+cmpData.A.id+'&cc=us&l=english'),
     safeFetch('https://store.steampowered.com/api/appdetails?appids='+cmpData.B.id+'&cc=us&l=english')
   ]);
-  var detA=(dA&&dA[cmpData.A.id]&&dA[cmpData.A.id].data)?dA[cmpData.A.id].data:null;
-  var detB=(dB&&dB[cmpData.B.id]&&dB[cmpData.B.id].data)?dB[cmpData.B.id].data:null;
+  var detA=(results[0]&&results[0][cmpData.A.id]&&results[0][cmpData.A.id].data)?results[0][cmpData.A.id].data:null;
+  var detB=(results[1]&&results[1][cmpData.B.id]&&results[1][cmpData.B.id].data)?results[1][cmpData.B.id].data:null;
   renderCompare(cmpData.A,detA,cmpData.B,detB);
 }
-
 function renderCompare(itemA,detA,itemB,detB){
+  function gs(item,det){return{
+    name:(det&&det.name)||item.name,img:(det&&det.header_image)||item.tiny_image||'',
+    price:det&&det.price_overview?det.price_overview.final/100:(det&&det.is_free?0:null),
+    priceFmt:det&&det.price_overview?det.price_overview.final_formatted:(det&&det.is_free?'Free':'N/A'),
+    reviews:(det&&det.recommendations)?det.recommendations.total:0,
+    dev:det&&det.developers?det.developers[0]:'N/A',
+    rel:det&&det.release_date&&det.release_date.date?det.release_date.date:'N/A',
+    genres:det&&det.genres?det.genres.slice(0,3).map(function(g){return g.description}).join(', '):'N/A',
+    platforms:det&&det.platforms?Object.keys(det.platforms).filter(function(k){return det.platforms[k]}).join(', '):'N/A',
+    metacritic:det&&det.metacritic?det.metacritic.score:'N/A',
+    size:det&&det.depots&&det.depots.branches&&det.depots.branches.public?'Known':'N/A'
+  }}
+  var sA=gs(itemA,detA),sB=gs(itemB,detB);
+  function cmpWin(va,vb,hi){
+    var a=parseFloat(va),b=parseFloat(vb);
+    if(isNaN(a)||isNaN(b)||va==='N/A'||vb==='N/A')return['',''];
+    if(hi){return a>b?['winner','']:a<b?['','winner']:['','']}
+    return a<b?['winner','']:a>b?['','winner']:['',''];
+  }
+  function row(label,va,vb,hi){
+    var w=cmpWin(va,vb,hi!==false);
+    return '<div class="cmp-row"><div class="cmp-val-a '+w[0]+'">'+esc(String(va))+'</div><div class="cmp-row-label">'+esc(label)+'</div><div class="cmp-val-b '+w[1]+'">'+esc(String(vb))+'</div></div>';
+  }
   var panel=document.getElementById('comparePanel');
-  function getStats(item,det){
-    return{
-      name:(det&&det.name)||item.name,
-      img:(det&&det.header_image)||item.tiny_image||'',
-      price:det&&det.price_overview?det.price_overview.final/100:(det&&det.is_free?0:null),
-      priceFmt:det&&det.price_overview?det.price_overview.final_formatted:(det&&det.is_free?'Free':'N/A'),
-      reviews:(det&&det.recommendations)?det.recommendations.total:0,
-      dev:det&&det.developers?det.developers[0]:'N/A',
-      rel:det&&det.release_date&&det.release_date.date?det.release_date.date:'N/A',
-      genres:det&&det.genres?det.genres.slice(0,3).map(function(g){return g.description}).join(', '):'N/A',
-      platforms:det&&det.platforms?Object.keys(det.platforms).filter(function(k){return det.platforms[k]}).join(', '):'N/A',
-      metacritic:det&&det.metacritic?det.metacritic.score:'N/A'
-    };
-  }
-  var sA=getStats(itemA,detA),sB=getStats(itemB,detB);
-  function cmp(va,vb,higherBetter){
-    if(va===null||vb===null||va==='N/A'||vb==='N/A')return['',''];
-    var av=parseFloat(va),bv=parseFloat(vb);
-    if(isNaN(av)||isNaN(bv))return['',''];
-    if(higherBetter){return av>bv?['winner','']:av<bv?['','winner']:['','']}
-    else{return av<bv?['winner','']:av>bv?['','winner']:['','']}
-  }
-  function row(label,va,vb,higherBetter){
-    var w=cmp(va,vb,higherBetter!==false);
-    return '<div class="compare-stat-row"><div class="compare-stat-val '+w[0]+'">'+esc(String(va))+'</div><div class="compare-stat-label">'+esc(label)+'</div><div class="compare-stat-val '+w[1]+'">'+esc(String(vb))+'</div></div>';
-  }
   panel.innerHTML=
     '<div class="compare-panel">'+
-    '<div class="compare-hero-row">'+
-    '<div class="compare-side">'+(sA.img?'<img class="compare-hero-img" src="'+esc(sA.img)+'" alt="">':'<div style="height:100px;background:var(--bg4)"></div>')+'<div class="compare-side-body"><div style="font-size:14px;font-weight:700;margin-bottom:3px">'+esc(sA.name)+'</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">APP '+itemA.id+'</div></div></div>'+
-    '<div style="display:flex;align-items:center;justify-content:center;background:var(--bg3);border-left:1px solid var(--border);border-right:1px solid var(--border);min-width:44px;font-size:12px;color:var(--text3);font-family:var(--mono)">VS</div>'+
-    '<div class="compare-side">'+(sB.img?'<img class="compare-hero-img" src="'+esc(sB.img)+'" alt="">':'<div style="height:100px;background:var(--bg4)"></div>')+'<div class="compare-side-body"><div style="font-size:14px;font-weight:700;margin-bottom:3px">'+esc(sB.name)+'</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">APP '+itemB.id+'</div></div></div>'+
+    '<div class="cmp-header-row">'+
+    '<div class="cmp-header-side">'+
+      '<div class="cmp-header-hero">'+(sA.img?'<img src="'+esc(sA.img)+'" alt="">':'')+'</div>'+
+      '<div class="cmp-header-info"><div class="cmp-header-name">'+esc(sA.name)+'</div><div class="cmp-header-id">APP '+itemA.id+'</div></div>'+
     '</div>'+
-    '<div style="padding:16px 20px">'+
-    row('Price (USD)',sA.price,sB.price,false)+
+    '<div class="cmp-vs-badge">VS</div>'+
+    '<div class="cmp-header-side">'+
+      '<div class="cmp-header-hero">'+(sB.img?'<img src="'+esc(sB.img)+'" alt="">':'')+'</div>'+
+      '<div class="cmp-header-info"><div class="cmp-header-name">'+esc(sB.name)+'</div><div class="cmp-header-id">APP '+itemB.id+'</div></div>'+
+    '</div>'+
+    '</div>'+
+    '<div class="cmp-table">'+
+    '<div style="font-size:9px;font-family:var(--mono);color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:grid;grid-template-columns:1fr 120px 1fr;gap:12px"><span style="text-align:right">Game A</span><span style="text-align:center">Stat</span><span>Game B</span></div>'+
+    row('Price (USD)',sA.price!=null?'$'+sA.price.toFixed(2):'N/A',sB.price!=null?'$'+sB.price.toFixed(2):'N/A',false)+
     row('Reviews',sA.reviews,sB.reviews,true)+
     row('Metacritic',sA.metacritic,sB.metacritic,true)+
-    '<div class="compare-stat-row"><div class="compare-stat-val">'+esc(sA.rel)+'</div><div class="compare-stat-label">Release Date</div><div class="compare-stat-val">'+esc(sB.rel)+'</div></div>'+
-    '<div class="compare-stat-row"><div class="compare-stat-val">'+esc(sA.dev)+'</div><div class="compare-stat-label">Developer</div><div class="compare-stat-val">'+esc(sB.dev)+'</div></div>'+
-    '<div class="compare-stat-row"><div class="compare-stat-val">'+esc(sA.genres)+'</div><div class="compare-stat-label">Genres</div><div class="compare-stat-val">'+esc(sB.genres)+'</div></div>'+
-    '<div class="compare-stat-row"><div class="compare-stat-val">'+esc(sA.platforms)+'</div><div class="compare-stat-label">Platforms</div><div class="compare-stat-val">'+esc(sB.platforms)+'</div></div>'+
-    '<div class="compare-stat-row"><div class="compare-stat-val">$'+esc(String(sA.priceFmt))+'</div><div class="compare-stat-label">List Price</div><div class="compare-stat-val">'+esc(String(sB.priceFmt))+'</div></div>'+
+    '<div class="cmp-row"><div class="cmp-val-a">'+esc(sA.rel)+'</div><div class="cmp-row-label">Release</div><div class="cmp-val-b">'+esc(sB.rel)+'</div></div>'+
+    '<div class="cmp-row"><div class="cmp-val-a">'+esc(sA.dev)+'</div><div class="cmp-row-label">Developer</div><div class="cmp-val-b">'+esc(sB.dev)+'</div></div>'+
+    '<div class="cmp-row"><div class="cmp-val-a">'+esc(sA.genres)+'</div><div class="cmp-row-label">Genres</div><div class="cmp-val-b">'+esc(sB.genres)+'</div></div>'+
+    '<div class="cmp-row"><div class="cmp-val-a">'+esc(sA.platforms)+'</div><div class="cmp-row-label">Platforms</div><div class="cmp-val-b">'+esc(sB.platforms)+'</div></div>'+
+    '<div class="cmp-row"><div class="cmp-val-a">'+esc(sA.priceFmt)+'</div><div class="cmp-row-label">List Price</div><div class="cmp-val-b">'+esc(sB.priceFmt)+'</div></div>'+
     '</div></div>';
 }
+function goToCompare(appId,name){goTo('compare');setTimeout(function(){document.getElementById('cmpInputA').value=String(appId);doCmpSearch('A')},100)}
 
-function goToCompare(appId,name){
-  goTo('compare');
-  setTimeout(function(){
-    document.getElementById('cmpInputA').value=String(appId);
-      
-    doCmpSearch('A');
-  },100);
+// ═══════════════════════════════════════════════════════
+//  STEAM ACCOUNT (Public Steam Web API - no OAuth needed)
+// ═══════════════════════════════════════════════════════
+async function connectSteam(){
+  var q=document.getElementById('steamIdInput').value.trim();if(!q){toast('Enter a Steam ID64',true);return}
+  var btn=document.getElementById('steamConnectBtn'),txt=document.getElementById('steamConnectTxt');
+  btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
+  setSt('steamSt','Loading profile...','loading');
+  document.getElementById('steamProfile').innerHTML='';
+  // Steam Web API GetPlayerSummaries endpoint (public, via proxy)
+  var steamId=q;
+  // Try to resolve vanity URL if it looks like a name not a 17-digit number
+  if(!/^\d{17}$/.test(q)){
+    var vanity=await safeFetch('https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key=DEMO_KEY&vanityurl='+encodeURIComponent(q));
+    if(vanity&&vanity.response&&vanity.response.steamid){steamId=vanity.response.steamid}
+    else{
+      // Try SteamID lookup proxy
+      var tryId=await safeFetch('https://steamid.venner.io/raw.php?input='+encodeURIComponent(q));
+      if(tryId&&tryId.steam64){steamId=tryId.steam64}
+      else{setSt('steamSt','Could not resolve "'+q+'" — try entering your Steam ID64 directly (17-digit number)','err');btn.disabled=false;txt.textContent='Load Profile';return}
+    }
+  }
+  var profileData=await safeFetch('https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v2/?key=DEMO_KEY&steamids='+steamId);
+  var gamesData=await safeFetch('https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=DEMO_KEY&steamid='+steamId+'&include_appinfo=1&include_played_free_games=1');
+  var friendsData=await safeFetch('https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=DEMO_KEY&steamid='+steamId+'&relationship=friend');
+  var player=(profileData&&profileData.response&&profileData.response.players&&profileData.response.players[0])?profileData.response.players[0]:null;
+  var games=(gamesData&&gamesData.response&&gamesData.response.games)?gamesData.response.games:[];
+  var friendCount=(friendsData&&friendsData.friendslist&&friendsData.friendslist.friends)?friendsData.friendslist.friends.length:0;
+  if(!player){
+    // Profile is private or API key limited — show demo UI with explanation
+    renderSteamProfileDemo(steamId);
+    setSt('steamSt','Profile loaded (limited — Steam API key required for full data)','ok');
+    btn.disabled=false;txt.textContent='Load Profile';return;
+  }
+  renderSteamProfile(player,games,friendCount,steamId);
+  setSt('steamSt','Loaded: '+player.personaname,'ok');
+  btn.disabled=false;txt.textContent='Load Profile';
+}
+
+function renderSteamProfile(player,games,friendCount,steamId){
+  var stateMap={0:'Offline',1:'Online',2:'Busy',3:'Away',4:'Snooze',5:'Looking to trade',6:'Looking to play'};
+  var state=stateMap[player.personastate]||'Unknown';
+  var totalHours=games.reduce(function(a,g){return a+(g.playtime_forever||0)},0);
+  var topGames=games.slice().sort(function(a,b){return(b.playtime_forever||0)-(a.playtime_forever||0)}).slice(0,6);
+  var html=
+    '<div class="steam-connect-box" style="margin-bottom:14px">'+
+    '<div class="steam-profile-row">'+
+    (player.avatarmedium?'<img class="steam-avatar" src="'+esc(player.avatarmedium)+'" alt="">':'')+
+    '<div><div class="steam-profile-name">'+esc(player.personaname)+'</div><div class="steam-profile-id">'+steamId+'</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:2px">Status: '+esc(state)+(player.loccountrycode?' · '+esc(player.loccountrycode):'')+'</div></div>'+
+    '<div class="spacer"></div>'+
+    '<a href="'+esc(player.profileurl)+'" target="_blank" class="btn btn-steam" style="font-size:11px;padding:7px 12px">Open on Steam ↗</a>'+
+    '</div>'+
+    '<div class="steam-stat-row">'+
+    '<div class="steam-stat"><div class="steam-stat-val">'+games.length+'</div><div class="steam-stat-lbl">Games</div></div>'+
+    '<div class="steam-stat"><div class="steam-stat-val">'+Math.round(totalHours/60)+'</div><div class="steam-stat-lbl">Hours</div></div>'+
+    '<div class="steam-stat"><div class="steam-stat-val">'+friendCount+'</div><div class="steam-stat-lbl">Friends</div></div>'+
+    '<div class="steam-stat"><div class="steam-stat-val">'+(player.timecreated?new Date(player.timecreated*1000).getFullYear():'?')+'</div><div class="steam-stat-lbl">Member Since</div></div>'+
+    '</div></div>';
+  if(topGames.length){
+    html+='<div class="section-title">Most Played Games</div><div class="steam-library-grid">';
+    topGames.forEach(function(g){
+      var img='https://media.steampowered.com/steamcommunity/public/images/apps/'+g.appid+'/'+g.img_icon_url+'.jpg';
+      var hrs=Math.round((g.playtime_forever||0)/60);
+      html+='<div class="game-tile" style="cursor:pointer" onclick="goTo(\'search\');setTimeout(function(){loadGameById('+g.appid+',true)},100)">'+
+        (g.img_icon_url?'<img src="'+esc(img)+'" alt="">':'<div class="game-tile-ph">'+esc(g.appid)+'</div>')+
+        '<div class="game-tile-info"><div class="game-tile-name">'+esc(g.name||'App '+g.appid)+'</div><div class="game-tile-meta">'+hrs+'h played</div></div></div>';
+    });
+    html+='</div>';
+    if(games.length>6){html+='<div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:8px">Showing top 6 of '+games.length+' games by playtime</div>'}
+  }
+  document.getElementById('steamProfile').innerHTML=html;
+}
+
+function renderSteamProfileDemo(steamId){
+  document.getElementById('steamProfile').innerHTML=
+    '<div class="steam-connect-box">'+
+    '<div style="font-size:12px;font-weight:700;margin-bottom:8px">Profile Loaded (Limited Access)</div>'+
+    '<div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.7;margin-bottom:14px">'+
+    'Steam ID: <strong style="color:var(--text2)">'+esc(steamId)+'</strong><br><br>'+
+    'The Steam Web API requires a registered API key to access full profile data (games, hours, friends). Without a key, player summaries and game libraries are inaccessible.<br><br>'+
+    'To get full access: visit <a href="https://steamcommunity.com/dev/apikey" target="_blank" style="color:var(--text2)">steamcommunity.com/dev/apikey</a> to register a free API key, then this tool can be self-hosted with your key to unlock all profile features.'+
+    '</div>'+
+    '<a href="https://store.steampowered.com/profiles/'+esc(steamId)+'" target="_blank" class="btn btn-steam">View Public Profile on Steam ↗</a>'+
+    '</div>';
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1168,17 +1367,12 @@ async function doGenSearch(){
   setSt('genSt','Searching...','loading');document.getElementById('genDetail').innerHTML='';
   if(genMode==='id'||/^\d+$/.test(q)){
     var data=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+q+'&cc=us&l=english');
-    if(data&&data[q]&&data[q].data){
-      var det=data[q].data;
-      renderGenResults([{id:parseInt(q),name:det.name,tiny_image:det.header_image}]);
-      renderGenDetail({id:parseInt(q),name:det.name},det);
-      setSt('genSt','Found: '+det.name,'ok');
-    }else setSt('genSt','App ID not found','err');
+    if(data&&data[q]&&data[q].data){var det=data[q].data;renderGenResults([{id:parseInt(q),name:det.name,tiny_image:det.header_image}]);renderGenDetail({id:parseInt(q),name:det.name},det);setSt('genSt','Found: '+det.name,'ok')}
+    else setSt('genSt','App ID not found','err');
   }else{
     var data=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');
     var items=(data&&data.items)?data.items:[];
-    renderGenResults(items);
-    setSt('genSt',items.length?'Found '+items.length+' results':'No results','ok');
+    renderGenResults(items);setSt('genSt',items.length?'Found '+items.length+' results':'No results','ok');
   }
   btn.disabled=false;txt.textContent='Search';
 }
@@ -1187,10 +1381,7 @@ function renderGenResults(items){
   items.forEach(function(item,i){
     var el=document.createElement('div');el.className='sresult';el.style.animationDelay=(i*20)+'ms';
     el.innerHTML=(item.tiny_image?'<img src="'+esc(item.tiny_image)+'" alt="">':'<div class="sresult-ph">N/A</div>')+'<div class="sresult-info"><div class="sresult-name">'+esc(item.name)+'</div><div class="sresult-id">APP '+item.id+'</div></div><div class="sresult-badge">'+item.id+'</div>';
-    el.addEventListener('click',function(){
-      document.querySelectorAll('#genResults .sresult').forEach(function(r){r.classList.remove('sel')});
-      el.classList.add('sel');loadGenDetail(item);
-    });
+    el.addEventListener('click',function(){document.querySelectorAll('#genResults .sresult').forEach(function(r){r.classList.remove('sel')});el.classList.add('sel');loadGenDetail(item)});
     rg.appendChild(el);
   });
 }
@@ -1203,27 +1394,21 @@ async function loadGenDetail(item){
   renderGenDetail(item,details);
 }
 function renderGenDetail(item,details){
-  var appId=item.id;
-  var name=(details&&details.name)?details.name:item.name;
+  var appId=item.id;var name=(details&&details.name)?details.name:item.name;
   var lua=mkLua(appId,details);var acf=mkAcf(appId,name);
   var img=(details&&details.header_image)?details.header_image:(item.tiny_image||null);
   var tags=(details&&details.genres)?details.genres.slice(0,4).map(function(g){return'<span class="tag">'+esc(g.description)+'</span>'}).join(' '):'';
   var panel=document.getElementById('genDetail');
   panel.innerHTML=
     '<div class="detail-panel">'+
-    '<div class="detail-hero">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="detail-hero-overlay"></div>'+
-    '<div class="detail-hero-content"><div class="detail-name">'+esc(name)+'</div><div>'+tags+'</div></div></div>'+
+    '<div class="detail-hero">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="detail-hero-overlay"></div><div class="detail-hero-content"><div class="detail-name">'+esc(name)+'</div><div>'+tags+'</div></div></div>'+
     '<div class="detail-body"><div class="section-title">Generated Files</div>'+
     '<div class="file-grid">'+
     '<div class="file-card"><div class="file-head"><span class="file-name">'+appId+'.lua</span><div class="file-head-right"><span class="file-badge">LUA</span><button class="copy-btn" id="copyLua_'+appId+'">copy</button></div></div><div class="file-body" id="luaBody_'+appId+'">'+hlLua(lua)+'</div></div>'+
     '<div class="file-card"><div class="file-head"><span class="file-name">appmanifest_'+appId+'.acf</span><div class="file-head-right"><span class="file-badge">ACF</span><button class="copy-btn" id="copyAcf_'+appId+'">copy</button></div></div><div class="file-body" id="acfBody_'+appId+'">'+hlAcf(acf)+'</div></div>'+
     '</div>'+
-    '<div class="row mt16">'+
-    '<div style="font-size:11px;color:var(--text3);font-family:var(--mono)"><strong style="color:var(--text2)">'+appId+'.zip</strong> — extract and use files</div>'+
-    '<div class="spacer"></div>'+
-    '<button id="dlbtn_'+appId+'" class="btn">Download ZIP</button>'+
-    '</div></div></div>';
-  // Store raw for copy
+    '<div class="row mt16"><div style="font-size:11px;color:var(--text3);font-family:var(--mono)"><strong style="color:var(--text2)">'+appId+'.zip</strong> — extract and use files</div><div class="spacer"></div><button id="dlbtn_'+appId+'" class="btn">Download ZIP</button></div>'+
+    '</div></div>';
   document.getElementById('copyLua_'+appId).addEventListener('click',function(){copyText(lua,'Lua copied')});
   document.getElementById('copyAcf_'+appId).addEventListener('click',function(){copyText(acf,'ACF copied')});
   document.getElementById('dlbtn_'+appId).addEventListener('click',function(){doDownload(appId,name,details)});
@@ -1239,22 +1424,17 @@ async function doDepotSearch(){
   btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
   setSt('depotSt','Loading...','loading');document.getElementById('depotResults').innerHTML='';
   var appId=null;
-  if(/^\d+$/.test(q)){appId=q}
-  else{var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');if(s&&s.items&&s.items[0])appId=s.items[0].id}
+  if(/^\d+$/.test(q)){appId=q}else{var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');if(s&&s.items&&s.items[0])appId=s.items[0].id}
   if(!appId){setSt('depotSt','Not found','err');btn.disabled=false;txt.textContent='Explore';return}
   var data=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+appId+'&cc=us&l=english');
   var details=(data&&data[appId]&&data[appId].data)?data[appId].data:null;
-  if(!details){setSt('depotSt','Could not load depot data — CORS proxy may be unavailable','err');btn.disabled=false;txt.textContent='Explore';return}
-  renderDepots(appId,details);
-  setSt('depotSt','Loaded: '+details.name,'ok');
-  btn.disabled=false;txt.textContent='Explore';
+  if(!details){setSt('depotSt','Could not load data','err');btn.disabled=false;txt.textContent='Explore';return}
+  renderDepots(appId,details);setSt('depotSt','Loaded: '+details.name,'ok');btn.disabled=false;txt.textContent='Explore';
 }
 function renderDepots(appId,details){
-  var depots=details.depots||{};
-  var depotKeys=Object.keys(depots).filter(function(k){return/^\d+$/.test(k)});
-  var branches=depots.branches||{};
+  var depots=details.depots||{};var depotKeys=Object.keys(depots).filter(function(k){return/^\d+$/.test(k)});var branches=depots.branches||{};
   var html='<div class="section-title mt16">'+esc(details.name)+' — Depots ('+depotKeys.length+')</div><div style="display:grid;gap:5px;margin-bottom:18px">';
-  if(!depotKeys.length){html+='<div class="empty-state"><div class="empty-icon">[no depots]</div>No depot data from API for this app</div>'}
+  if(!depotKeys.length){html+='<div class="empty-state"><div class="empty-icon">[no depots]</div>No depot data from API</div>'}
   else{depotKeys.forEach(function(k){var d=depots[k];var mfst=d.manifests&&d.manifests.public?(typeof d.manifests.public==='object'?d.manifests.public.gid:d.manifests.public):'N/A';var sz=d.maxsize?Math.round(d.maxsize/1073741824*10)/10+' GB':'N/A';html+='<div class="depot-card"><div class="depot-id">Depot '+k+(d.name?' — '+esc(d.name):'')+'</div><div class="depot-meta">Manifest: '+esc(String(mfst))+'  |  Size: '+esc(sz)+'</div></div>'})}
   html+='</div><div class="section-title">Branches ('+Object.keys(branches).length+')</div><div style="display:grid;gap:5px">';
   if(!Object.keys(branches).length){html+='<div class="empty-state"><div class="empty-icon">[no branches]</div>No branch data available</div>'}
@@ -1278,44 +1458,28 @@ async function runApi(endpoint){
   var data=await safeFetch(url);
   document.getElementById('apiResponse').textContent=data?JSON.stringify(data,null,2):'// Failed to fetch — CORS proxies may be unavailable';
 }
-async function runCustomApi(){
-  var appId=document.getElementById('apiAppId').value.trim();
-  if(!appId){toast('Enter an App ID first',true);return}
-  runApi('appdetails');
-}
-function copyApiResponse(){
-  var txt=document.getElementById('apiResponse').textContent;
-  copyText(txt,'Response copied');
-}
+async function runCustomApi(){var appId=document.getElementById('apiAppId').value.trim();if(!appId){toast('Enter an App ID first',true);return}runApi('appdetails')}
+function copyApiResponse(){copyText(document.getElementById('apiResponse').textContent,'Response copied')}
 
 // ═══════════════════════════════════════════════════════
 //  LUA / ACF GENERATORS
 // ═══════════════════════════════════════════════════════
 function mkLua(appId,details){
   var lines=['-- ============================================','--  Credits: skullaf','--  Discord: skullaf_','-- ============================================','','addappid('+appId+')'];
-  if(details&&details.depots){
-    var keys=Object.keys(details.depots).filter(function(k){return/^\d+$/.test(k)});
-    keys.forEach(function(k){var d=details.depots[k];if(d&&d.manifests&&d.manifests.public){lines.push('addappid('+k+',0,"'+genHash(appId,k)+'")')}else if(d&&d.dlcappid){lines.push('addappid('+k+')')}});
-  }else{lines.push('addappid('+(parseInt(appId)+1)+',0,"'+genHash(appId,parseInt(appId)+1)+'")');lines.push('addappid('+(parseInt(appId)+2)+',0,"'+genHash(appId,parseInt(appId)+2)+'")')}
+  if(details&&details.depots){var keys=Object.keys(details.depots).filter(function(k){return/^\d+$/.test(k)});keys.forEach(function(k){var d=details.depots[k];if(d&&d.manifests&&d.manifests.public){lines.push('addappid('+k+',0,"'+genHash(appId,k)+'")')}else if(d&&d.dlcappid){lines.push('addappid('+k+')')}})}
+  else{lines.push('addappid('+(parseInt(appId)+1)+',0,"'+genHash(appId,parseInt(appId)+1)+'")');lines.push('addappid('+(parseInt(appId)+2)+',0,"'+genHash(appId,parseInt(appId)+2)+'")')}
   lines.push('');return lines.join('\n');
 }
-function genHash(appId,depotId){
-  var seed=String(appId)+String(depotId)+'sf',h='',c='0123456789abcdef';
-  for(var i=0;i<64;i++){var x=seed.charCodeAt(i%seed.length)^(i*31+parseInt(appId))^(parseInt(depotId)*17);h+=c[Math.abs(x)%16]}
-  return h;
-}
+function genHash(appId,depotId){var seed=String(appId)+String(depotId)+'sf',h='',c='0123456789abcdef';for(var i=0;i<64;i++){var x=seed.charCodeAt(i%seed.length)^(i*31+parseInt(appId))^(parseInt(depotId)*17);h+=c[Math.abs(x)%16]}return h}
 function mkAcf(appId,name){
   var ts=Math.floor(Date.now()/1000),build=Math.floor(10000000+Math.random()*89999999),size=Math.floor(2147483648+Math.random()*5368709120),mfst=Math.floor(1000000000000000+Math.random()*8000000000000000),dir=String(name).replace(/[^a-zA-Z0-9 ]/g,'').trim().substring(0,40);
   return['"AppState"','{','\t"appid"\t\t"'+appId+'"','\t"Universe"\t\t"1"','\t"name"\t\t"'+String(name).replace(/"/g,'\\"')+'"','\t"StateFlags"\t\t"4"','\t"installdir"\t\t"'+dir+'"','\t"LastUpdated"\t\t"'+ts+'"','\t"SizeOnDisk"\t\t"'+size+'"','\t"StagingSize"\t\t"0"','\t"buildid"\t\t"'+build+'"','\t"LastOwner"\t\t"0"','\t"UpdateResult"\t\t"0"','\t"BytesToDownload"\t\t"0"','\t"BytesDownloaded"\t\t"'+size+'"','\t"BytesToStage"\t\t"0"','\t"BytesStaged"\t\t"'+size+'"','\t"TargetBuildID"\t\t"'+build+'"','\t"AutoUpdateBehavior"\t\t"0"','\t"AllowOtherDownloadsWhileRunning"\t\t"0"','\t"ScheduledAutoUpdate"\t\t"0"','\t"InstalledDepots"','\t{','\t\t"'+appId+'"','\t\t{','\t\t\t"manifest"\t\t"'+mfst+'"','\t\t\t"size"\t\t"'+size+'"','\t\t}','\t}','\t"UserConfig"','\t{','\t\t"language"\t\t"english"','\t}','\t"MountedConfig"','\t{','\t\t"language"\t\t"english"','\t}','}'].join('\n');
 }
-
-// Fixed: highlight AFTER esc(), match on &quot; entities
 function hlLua(raw){
   var s=esc(raw);
   s=s.replace(/(--[^\n]*)/g,'<span class="cm">$1</span>');
   s=s.replace(/\b(addappid)\b/g,'<span class="fn">$1</span>');
   s=s.replace(/&quot;([^&]*)&quot;/g,'<span class="str">&quot;$1&quot;</span>');
-  // only highlight standalone numbers not inside a span
   s=s.replace(/(?<![a-zA-Z"=])(\b\d+\b)(?![^<]*>)/g,'<span class="num">$1</span>');
   return s;
 }
@@ -1323,16 +1487,6 @@ function hlAcf(raw){
   var s=esc(raw);
   s=s.replace(/^(\t*)&quot;([^&]+)&quot;(\t+)&quot;([^&]*)&quot;$/mg,function(m,ind,k,tab,v){return ind+'<span class="kw">&quot;'+k+'&quot;</span>'+tab+'<span class="str">&quot;'+v+'&quot;</span>'});
   return s;
-}
-
-// ═══════════════════════════════════════════════════════
-//  COPY UTILITY
-// ═══════════════════════════════════════════════════════
-function copyText(txt,msg){
-  navigator.clipboard.writeText(txt).then(function(){toast(msg||'Copied!')}).catch(function(){
-    // fallback
-    var ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;top:-9999px;left:-9999px';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast(msg||'Copied!')}catch(e){toast('Copy failed',true)}document.body.removeChild(ta);
-  });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1377,11 +1531,9 @@ async function homeSearch(){
 }
 
 // ═══════════════════════════════════════════════════════
-//  GLOBAL KEYBOARD ENTER BINDINGS
+//  KEYBOARD ENTER BINDINGS
 // ═══════════════════════════════════════════════════════
-document.getElementById('globalSearch').addEventListener('keydown',function(e){
-  if(e.key==='Enter'){var q=this.value.trim();if(!q)return;goTo('search');setTimeout(function(){document.getElementById('srchInput').value=q;doSearch()},80);this.value=''}
-});
+document.getElementById('globalSearch').addEventListener('keydown',function(e){if(e.key==='Enter'){var q=this.value.trim();if(!q)return;goTo('search');setTimeout(function(){document.getElementById('srchInput').value=q;doSearch()},80);this.value=''}});
 document.getElementById('homeSearchInput').addEventListener('keydown',function(e){if(e.key==='Enter')homeSearch()});
 document.getElementById('srchInput').addEventListener('keydown',function(e){if(e.key==='Enter')doSearch()});
 document.getElementById('priceInput').addEventListener('keydown',function(e){if(e.key==='Enter')doPriceSearch()});
@@ -1390,6 +1542,7 @@ document.getElementById('genInput').addEventListener('keydown',function(e){if(e.
 document.getElementById('depotInput').addEventListener('keydown',function(e){if(e.key==='Enter')doDepotSearch()});
 document.getElementById('cmpInputA').addEventListener('keydown',function(e){if(e.key==='Enter')doCmpSearch('A')});
 document.getElementById('cmpInputB').addEventListener('keydown',function(e){if(e.key==='Enter')doCmpSearch('B')});
+document.getElementById('steamIdInput').addEventListener('keydown',function(e){if(e.key==='Enter')connectSteam()});
 </script>
 </body>
 </html>
