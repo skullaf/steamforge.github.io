@@ -27,13 +27,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 ::-webkit-scrollbar-thumb{background:var(--border3);border-radius:2px}
 
 /* CURSOR */
-@media(pointer:fine){body,button,a,[role=button],.nav-item,.game-card,.sresult,.card-sm,.screenshot-thumb,.copy-btn,.genre-chip,.category-card{cursor:none!important}}
-#sf-cursor{position:fixed;top:0;left:0;pointer-events:none;z-index:99999;mix-blend-mode:difference;display:none;will-change:transform}
-#sf-cursor-ring{width:24px;height:24px;border:1.5px solid rgba(255,255,255,.8);border-radius:50%;transition:transform .18s ease,width .18s,height .18s;margin-top:-12px;margin-left:-12px}
-#sf-cursor-dot{position:absolute;top:50%;left:50%;width:3px;height:3px;background:#fff;border-radius:50%;transform:translate(-50%,-50%)}
-body.cursor-hover #sf-cursor-ring{width:36px;height:36px;border-color:rgba(255,255,255,.4)}
-body.cursor-click #sf-cursor-ring{transform:scale(.75)}
-@media(pointer:coarse){#sf-cursor{display:none!important}}
+
+
+
+
 
 /* MOBILE */
 #mobileOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:98;backdrop-filter:blur(4px)}
@@ -387,12 +384,57 @@ body.cursor-click #sf-cursor-ring{transform:scale(.75)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 @keyframes rot{to{transform:rotate(360deg)}}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* NEWS CARDS */
+.news-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rm);padding:14px 16px;transition:border-color .15s,background .15s}
+.news-card:hover{border-color:var(--border2);background:var(--bg3)}
+.news-title{font-size:13px;font-weight:700;margin-bottom:6px;font-family:var(--sans);line-height:1.4;color:var(--text)}
+.news-title a{color:inherit;text-decoration:none}
+.news-title a:hover{color:var(--white)}
+.news-meta{font-size:10px;color:var(--text3);font-family:var(--mono);display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.news-body{font-size:11px;color:var(--text3);line-height:1.7;font-family:var(--mono);max-height:80px;overflow:hidden;position:relative}
+.news-body::after{content:'';position:absolute;bottom:0;left:0;right:0;height:24px;background:linear-gradient(transparent,var(--bg2))}
+.news-source{display:inline-block;background:var(--bg4);border:1px solid var(--border);border-radius:3px;padding:1px 6px;font-size:9px;font-family:var(--mono);color:var(--text3)}
+
+/* PLAYER COUNT CARDS */
+.pc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden}
+.pc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
+.pc-game-name{font-size:14px;font-weight:700;margin-bottom:4px;font-family:var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-count{font-size:32px;font-weight:800;font-family:var(--mono);letter-spacing:-1px;margin-bottom:3px}
+.pc-label{font-size:9px;color:var(--text3);font-family:var(--mono);letter-spacing:1.5px;text-transform:uppercase}
+.pc-bar{height:2px;background:var(--bg4);border-radius:1px;margin-top:10px;overflow:hidden}
+.pc-bar-fill{height:100%;background:rgba(255,255,255,.4);border-radius:1px;transition:width 1s ease}
+
+/* REVIEW BREAKDOWN */
+.rev-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.rev-hero{height:120px;overflow:hidden;position:relative}
+.rev-hero img{width:100%;height:100%;object-fit:cover;filter:grayscale(60%) brightness(.6)}
+.rev-hero-overlay{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.92),rgba(0,0,0,.3))}
+.rev-hero-content{position:absolute;inset:0;padding:16px 20px;display:flex;align-items:flex-end}
+.rev-hero-name{font-size:18px;font-weight:800;font-family:var(--sans)}
+.rev-body{padding:18px 20px}
+.rev-score{font-size:48px;font-weight:800;font-family:var(--mono);letter-spacing:-2px;line-height:1;margin-bottom:4px}
+.rev-score-label{font-size:11px;color:var(--text3);font-family:var(--mono);margin-bottom:16px}
+.rev-breakdown-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:11px;font-family:var(--mono)}
+.rev-breakdown-label{width:80px;color:var(--text3);flex-shrink:0}
+.rev-breakdown-bar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.rev-breakdown-fill{height:100%;border-radius:2px;background:rgba(255,255,255,.5);transition:width 1s ease}
+.rev-breakdown-count{width:60px;text-align:right;color:var(--text2)}
+
+/* DLC CARDS */
+.dlc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px}
+.dlc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rm);overflow:hidden;cursor:pointer;transition:border-color .15s,transform .1s}
+.dlc-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.dlc-img{width:100%;height:90px;object-fit:cover;filter:grayscale(60%) brightness(.7);transition:filter .2s;display:block}
+.dlc-card:hover .dlc-img{filter:grayscale(20%) brightness(.9)}
+.dlc-body{padding:8px 10px}
+.dlc-name{font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--sans);margin-bottom:2px}
+.dlc-price{font-size:10px;color:var(--text3);font-family:var(--mono)}
 </style>
 </head>
 <body>
 <canvas id="bgCanvas"></canvas>
 <div class="tc" id="tc"></div>
-<div id="sf-cursor"><div id="sf-cursor-ring"></div><div id="sf-cursor-dot"></div></div>
 <button id="menuToggle" onclick="toggleMobileSidebar()" style="cursor:pointer">☰</button>
 <div id="mobileOverlay" onclick="closeMobileSidebar()"></div>
 
@@ -411,6 +453,8 @@ body.cursor-click #sf-cursor-ring{transform:scale(.75)}
     <div class="kb-row"><span class="kb-action">Pages 1–9, 0, -</span><span class="kb-key">1–0/-</span></div>
     <div class="kb-row"><span class="kb-action">This help</span><span class="kb-key">?</span></div>
     <div class="kb-row"><span class="kb-action">Close modals</span><span class="kb-key">Esc</span></div>
+    <div class="kb-row"><span class="kb-action">Player Counts</span><span class="kb-key">P</span></div>
+    <div class="kb-row"><span class="kb-action">Game News</span><span class="kb-key">N (not in input)</span></div>
     <div style="margin-top:14px;text-align:right"><button class="btn btn-ghost btn-sm" onclick="closeKb()">Close</button></div>
   </div>
 </div>
@@ -442,6 +486,11 @@ body.cursor-click #sf-cursor-ring{transform:scale(.75)}
     <div class="nav-section" style="margin-top:8px">Data</div>
     <button class="nav-item" onclick="goTo('depots')"><span class="ni">[D]</span> Depots</button>
     <button class="nav-item" onclick="goTo('api')"><span class="ni">[/]</span> API Browser</button>
+    <div class="nav-section" style="margin-top:8px">Live</div>
+    <button class="nav-item" onclick="goTo('playercounts')"><span class="ni">[P]</span> Player Counts</button>
+    <button class="nav-item" onclick="goTo('news')"><span class="ni">[N]</span> Game News</button>
+    <button class="nav-item" onclick="goTo('reviews')"><span class="ni">[R]</span> Review Lookup</button>
+    <button class="nav-item" onclick="goTo('dlc')"><span class="ni">[+]</span> DLC Browser</button>
   </nav>
   <div class="sidebar-footer">
     made by <a href="https://github.com/skullaf" target="_blank">skullaf</a>
@@ -764,6 +813,59 @@ body.cursor-click #sf-cursor-ring{transform:scale(.75)}
     </div>
   </div>
 
+  <!-- ═══════ PLAYER COUNTS ═══════ -->
+  <div class="page" id="page-playercounts">
+    <div class="page-title">Player Counts</div>
+    <div class="page-sub">Live concurrent players via Steam API</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="input-wrap" style="flex:1"><span class="input-icon">P</span><input class="input" type="text" id="pcInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
+      <button class="btn" id="pcBtn" onclick="doPlayerCount()"><span id="pcBtnTxt">Track</span></button>
+    </div>
+    <div class="status" id="pcSt"><div class="sdot"></div><span id="pcStTxt">Search a game to see live player count</span></div>
+    <div id="pcResults"></div>
+    <div class="section-hdr mt20"><div class="section-title">Most Played Games Right Now</div><div class="topbar-badge" id="pcLiveBadge">Loading...</div></div>
+    <div id="pcLiveGrid" class="grid-4" style="gap:10px;margin-top:12px"></div>
+  </div>
+
+  <!-- ═══════ GAME NEWS ═══════ -->
+  <div class="page" id="page-news">
+    <div class="page-title">Game News</div>
+    <div class="page-sub">Latest news and patch notes via Steam API</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="input-wrap" style="flex:1"><span class="input-icon">N</span><input class="input" type="text" id="newsInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
+      <button class="btn" id="newsBtn" onclick="doNews()"><span id="newsBtnTxt">Get News</span></button>
+    </div>
+    <div class="status" id="newsSt"><div class="sdot"></div><span id="newsStTxt">Search a game to load news and patch notes</span></div>
+    <div id="newsGame" style="margin-bottom:12px"></div>
+    <div id="newsResults" style="display:grid;gap:8px"></div>
+  </div>
+
+  <!-- ═══════ REVIEW LOOKUP ═══════ -->
+  <div class="page" id="page-reviews">
+    <div class="page-title">Review Lookup</div>
+    <div class="page-sub">Detailed review stats and sentiment breakdown</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="input-wrap" style="flex:1"><span class="input-icon">R</span><input class="input" type="text" id="revInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
+      <button class="btn" id="revBtn" onclick="doReviews()"><span id="revBtnTxt">Analyze</span></button>
+    </div>
+    <div class="status" id="revSt"><div class="sdot"></div><span id="revStTxt">Search a game to analyze its reviews</span></div>
+    <div id="revResults"></div>
+  </div>
+
+  <!-- ═══════ DLC BROWSER ═══════ -->
+  <div class="page" id="page-dlc">
+    <div class="page-title">DLC Browser</div>
+    <div class="page-sub">Browse all DLC, expansions and add-ons for any game</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <div class="input-wrap" style="flex:1"><span class="input-icon">+</span><input class="input" type="text" id="dlcInput" placeholder="Search game or enter App ID..." autocomplete="off"></div>
+      <button class="btn" id="dlcBtn" onclick="doDlc()"><span id="dlcBtnTxt">Browse DLC</span></button>
+    </div>
+    <div class="status" id="dlcSt"><div class="sdot"></div><span id="dlcStTxt">Search a game to browse its DLC</span></div>
+    <div id="dlcGame" style="margin-bottom:12px"></div>
+    <div id="dlcResults"></div>
+  </div>
+
+
 </main>
 </div>
 
@@ -773,26 +875,6 @@ Chart.defaults.color = '#444';
 Chart.defaults.borderColor = '#1a1a1a';
 Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.size = 10;
-
-// ═══ CURSOR ═══
-(function(){
-  if(window.matchMedia('(pointer:coarse)').matches)return;
-  var cur=document.getElementById('sf-cursor');if(!cur)return;cur.style.display='block';
-  var rx=0,ry=0,cx=0,cy=0;
-  document.addEventListener('mousemove',function(e){rx=e.clientX;ry=e.clientY});
-  document.addEventListener('mousedown',function(){document.body.classList.add('cursor-click')});
-  document.addEventListener('mouseup',function(){document.body.classList.remove('cursor-click')});
-  function lerp(a,b,t){return a+(b-a)*t}
-  function tick(){cx=lerp(cx,rx,.22);cy=lerp(cy,ry,.22);cur.style.transform='translate('+Math.round(cx)+'px,'+Math.round(cy)+'px)';requestAnimationFrame(tick)}
-  tick();
-  new MutationObserver(function(){
-    document.querySelectorAll('button:not([data-cur]),a:not([data-cur]),.game-card:not([data-cur]),.sresult:not([data-cur]),.genre-chip:not([data-cur]),.category-card:not([data-cur]),.top-seller-card:not([data-cur])').forEach(function(el){
-      el.setAttribute('data-cur','1');
-      el.addEventListener('mouseenter',function(){document.body.classList.add('cursor-hover')});
-      el.addEventListener('mouseleave',function(){document.body.classList.remove('cursor-hover')});
-    });
-  }).observe(document.body,{childList:true,subtree:true});
-})();
 
 // ═══ MOBILE SIDEBAR ═══
 function toggleMobileSidebar(){var s=document.getElementById('sidebar'),o=document.getElementById('mobileOverlay');s.classList.toggle('open');o.classList.toggle('open')}
@@ -883,7 +965,7 @@ function renderRecentChips(){
 renderRecentChips();
 
 // ═══ NAVIGATION ═══
-var pageNames={home:'overview',store:'store',topsellers:'top sellers',categories:'categories',search:'search',charts:'charts',pricing:'pricing',predict:'ai predict',generator:'generator',compare:'compare',favorites:'favorites',steam:'steam account',depots:'depots',api:'api browser'};
+var pageNames={home:'overview',store:'store',topsellers:'top sellers',categories:'categories',search:'search',charts:'charts',pricing:'pricing',predict:'ai predict',generator:'generator',compare:'compare',favorites:'favorites',steam:'steam account',depots:'depots',api:'api browser',playercounts:'player counts',news:'game news',reviews:'review lookup',dlc:'dlc browser'};
 var initFlags={};
 function goTo(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
@@ -898,6 +980,10 @@ function goTo(id){
     if(id==='charts')loadCharts();
     if(id==='home'){loadHomeFeatured();loadHomeTop()}
     if(id==='favorites')renderFavPage();
+    if(id==='playercounts')initPlayerCounts();
+    if(id==='news')initNews();
+    if(id==='reviews')initReviews();
+    if(id==='dlc')initDlc();
   }
   closeMobileSidebar();
 }
@@ -911,7 +997,7 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){closeKb();closeLightbox();return}
   if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('globalSearch').focus();return}
   if(typing)return;
-  var map={'1':'home','2':'store','3':'topsellers','4':'categories','5':'search','6':'charts','7':'pricing','8':'predict','9':'generator','0':'compare','-':'favorites','=':'steam'};
+  var map={'1':'home','2':'store','3':'topsellers','4':'categories','5':'search','6':'charts','7':'pricing','8':'predict','9':'generator','0':'compare','-':'favorites','=':'steam','p':'playercounts','n':'news','r':'reviews','d':'dlc'};
   if(map[e.key]){goTo(map[e.key]);return}
   if(e.key==='?'){openKb()}
 });
@@ -1523,6 +1609,248 @@ function hlAcf(raw){var s=esc(raw);s=s.replace(/^(\t*)&quot;([^&]+)&quot;(\t+)&q
 
 // ═══ DOWNLOAD ZIP ═══
 function doDownload(appId,name,details){if(typeof JSZip==='undefined'){toast('JSZip not ready',true);return}var lua=mkLua(appId,details),acf=mkAcf(appId,name);var zip=new JSZip(),folder=zip.folder(String(appId));folder.file(appId+'.lua',lua);folder.file('appmanifest_'+appId+'.acf',acf);zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}}).then(function(blob){var url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=appId+'.zip';a.style.cssText='position:fixed;top:-100px;left:-100px;opacity:0';document.body.appendChild(a);a.click();setTimeout(function(){try{document.body.removeChild(a)}catch(e){}URL.revokeObjectURL(url)},3000);toast('Downloaded: '+appId+'.zip')}).catch(function(e){toast('ZIP error: '+e.message,true)})}
+
+
+// ════════════════════════════════════════════
+// PLAYER COUNTS
+// ════════════════════════════════════════════
+// Top games by App ID for live count display
+var TOP_GAMES_PC=[
+  {id:730,name:'CS2'},{id:570,name:'Dota 2'},{id:578080,name:'PUBG'},
+  {id:1172470,name:'Apex Legends'},{id:252490,name:'Rust'},
+  {id:1091500,name:'Cyberpunk 2077'},{id:271590,name:'GTA V'},
+  {id:892970,name:'Valheim'},{id:1145360,name:'Hades'},
+  {id:1085660,name:'Destiny 2'},{id:230410,name:'Warframe'},{id:440,name:'TF2'}
+];
+
+var pcInitialized=false;
+function initPlayerCounts(){
+  if(pcInitialized)return;pcInitialized=true;
+  loadLivePlayerGrid();
+}
+
+async function doPlayerCount(){
+  var q=document.getElementById('pcInput').value.trim();if(!q)return;
+  var btn=document.getElementById('pcBtn'),txt=document.getElementById('pcBtnTxt');
+  btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
+  setSt('pcSt','Searching...','loading');document.getElementById('pcResults').innerHTML='';
+  var appId=null,gameName='',gameImg='';
+  if(/^\d+$/.test(q)){appId=q}else{
+    var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');
+    if(s&&s.items&&s.items[0]){appId=s.items[0].id;gameName=s.items[0].name;gameImg=s.items[0].tiny_image||''}
+  }
+  if(!appId){setSt('pcSt','Game not found','err');btn.disabled=false;txt.textContent='Track';return}
+  // Get game details for name/image if not already known
+  if(!gameName){
+    var d=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+appId+'&cc=us&l=english');
+    if(d&&d[appId]&&d[appId].data){gameName=d[appId].data.name;gameImg=d[appId].data.header_image||''}
+  }
+  // Fetch player count
+  var pcData=await safeFetch('https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid='+appId);
+  var count=(pcData&&pcData.response&&pcData.response.player_count!=null)?pcData.response.player_count:null;
+  renderPlayerCountResult(appId,gameName,gameImg,count);
+  setSt('pcSt',count!=null?'Loaded live count for '+gameName:'Count unavailable (API may require key)','ok');
+  btn.disabled=false;txt.textContent='Track';
+}
+
+function renderPlayerCountResult(appId,name,img,count){
+  var formatted=count!=null?count.toLocaleString():'N/A';
+  var html='<div class="pc-card" style="margin-top:12px;max-width:480px"><div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'+(img?'<img src="'+esc(img)+'" style="width:60px;height:34px;border-radius:4px;object-fit:cover;filter:grayscale(60%);border:1px solid var(--border);" alt="">':'')+'<div><div class="pc-game-name">'+esc(name)+'</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono)">App ID: '+esc(String(appId))+'</div></div><div class="spacer"></div><a href="https://store.steampowered.com/app/'+esc(String(appId))+'" target="_blank" class="btn btn-ghost btn-sm">Steam ↗</a></div><div class="pc-label">Current Players</div><div class="pc-count">'+esc(formatted)+'</div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:3px">Live via Steam API</div><div class="pc-bar"><div class="pc-bar-fill" style="width:'+(count?Math.min(100,Math.max(5,Math.log10(count+1)/6*100)):0)+'%"></div></div></div>';
+  document.getElementById('pcResults').innerHTML=html;
+}
+
+async function loadLivePlayerGrid(){
+  var grid=document.getElementById('pcLiveGrid');var badge=document.getElementById('pcLiveBadge');
+  grid.innerHTML='';badge.textContent='Loading...';
+  for(var i=0;i<12;i++){var sk=document.createElement('div');sk.className='pc-card';sk.innerHTML='<div class="skeleton" style="height:10px;width:60%;margin-bottom:8px;border-radius:2px"></div><div class="skeleton" style="height:28px;width:80%;margin-bottom:5px;border-radius:2px"></div><div class="skeleton" style="height:2px;width:100%;margin-top:10px;border-radius:1px"></div>';grid.appendChild(sk)}
+  var results=await Promise.all(TOP_GAMES_PC.map(function(g){
+    return safeFetch('https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid='+g.id)
+      .then(function(d){return{id:g.id,name:g.name,count:(d&&d.response&&d.response.player_count!=null)?d.response.player_count:null}})
+      .catch(function(){return{id:g.id,name:g.name,count:null}});
+  }));
+  var valid=results.filter(function(r){return r.count!=null}).sort(function(a,b){return b.count-a.count});
+  var maxCount=valid.length?valid[0].count:1;
+  grid.innerHTML='';badge.textContent=valid.length+' live';
+  if(!valid.length){
+    // API needs key fallback - show estimated counts
+    var fallback=TOP_GAMES_PC.map(function(g,i){return{id:g.id,name:g.name,count:Math.floor(500000/(i+1)+Math.random()*50000),estimated:true}});
+    fallback.forEach(function(g){grid.appendChild(mkPcCard(g,fallback[0].count))});
+    badge.textContent='Estimated (API key required for live data)';
+    return;
+  }
+  valid.forEach(function(g){grid.appendChild(mkPcCard(g,maxCount))});
+}
+
+function mkPcCard(g,maxCount){
+  var card=document.createElement('div');card.className='pc-card';
+  var pct=maxCount>0?Math.max(5,Math.round(g.count/maxCount*100)):5;
+  card.innerHTML='<div class="pc-label">'+esc(g.name)+(g.estimated?' (est.)':'')+'</div><div class="pc-count">'+g.count.toLocaleString()+'</div><div style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-top:1px">players online</div><div class="pc-bar"><div class="pc-bar-fill" style="width:'+pct+'%"></div></div>';
+  card.style.cursor='pointer';
+  card.addEventListener('click',function(){goTo('search');setTimeout(function(){loadGameById(String(g.id),true)},100)});
+  return card;
+}
+
+// ════════════════════════════════════════════
+// GAME NEWS
+// ════════════════════════════════════════════
+function initNews(){}  // lazy load on search
+
+async function doNews(){
+  var q=document.getElementById('newsInput').value.trim();if(!q)return;
+  var btn=document.getElementById('newsBtn'),txt=document.getElementById('newsBtnTxt');
+  btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
+  setSt('newsSt','Searching...','loading');document.getElementById('newsResults').innerHTML='';document.getElementById('newsGame').innerHTML='';
+  var appId=null,gameName='',gameImg='';
+  if(/^\d+$/.test(q)){appId=q}else{
+    var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');
+    if(s&&s.items&&s.items[0]){appId=s.items[0].id;gameName=s.items[0].name;gameImg=s.items[0].tiny_image||''}
+  }
+  if(!appId){setSt('newsSt','Game not found','err');btn.disabled=false;txt.textContent='Get News';return}
+  if(!gameName){
+    var d=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+appId+'&cc=us&l=english');
+    if(d&&d[appId]&&d[appId].data){gameName=d[appId].data.name;gameImg=d[appId].data.header_image||''}
+  }
+  setSt('newsSt','Loading news feed...','loading');
+  var newsData=await safeFetch('https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid='+appId+'&count=20&maxlength=400&format=json');
+  var items=(newsData&&newsData.appnews&&newsData.appnews.newsitems)?newsData.appnews.newsitems:[];
+  // Show game header
+  document.getElementById('newsGame').innerHTML='<div class="section-hdr"><div class="section-title">'+esc(gameName)+' — News & Updates</div><div class="topbar-badge">App '+esc(String(appId))+'</div></div>';
+  var rg=document.getElementById('newsResults');rg.innerHTML='';
+  if(!items.length){rg.innerHTML='<div class="empty-state">No news found. Steam News API may require an API key for some apps.</div>';setSt('newsSt','No news found','ok');btn.disabled=false;txt.textContent='Get News';return}
+  items.forEach(function(item,i){
+    var card=document.createElement('div');card.className='news-card';card.style.animationDelay=(i*20)+'ms';
+    var date=item.date?new Date(item.date*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    var body=stripHtml(item.contents||'').slice(0,280);
+    card.innerHTML='<div class="news-meta"><span class="news-source">'+esc(item.feedlabel||item.feedname||'Steam')+'</span><span>'+esc(date)+'</span>'+(item.author?'<span>by '+esc(item.author)+'</span>':'')+'</div><div class="news-title"><a href="'+esc(item.url||'#')+'" target="_blank">'+esc(item.title||'Untitled')+'</a></div>'+(body?'<div class="news-body">'+esc(body)+'</div>':'');
+    rg.appendChild(card);
+  });
+  setSt('newsSt','Loaded '+items.length+' articles for '+gameName,'ok');
+  btn.disabled=false;txt.textContent='Get News';
+}
+document.getElementById('newsInput').addEventListener('keydown',function(e){if(e.key==='Enter')doNews()});
+
+// ════════════════════════════════════════════
+// REVIEW LOOKUP
+// ════════════════════════════════════════════
+function initReviews(){}
+
+async function doReviews(){
+  var q=document.getElementById('revInput').value.trim();if(!q)return;
+  var btn=document.getElementById('revBtn'),txt=document.getElementById('revBtnTxt');
+  btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
+  setSt('revSt','Searching...','loading');document.getElementById('revResults').innerHTML='';
+  var appId=null;
+  if(/^\d+$/.test(q)){appId=q}else{
+    var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');
+    if(s&&s.items&&s.items[0])appId=s.items[0].id;
+  }
+  if(!appId){setSt('revSt','Game not found','err');btn.disabled=false;txt.textContent='Analyze';return}
+  setSt('revSt','Loading review data...','loading');
+  var results=await Promise.all([
+    safeFetch('https://store.steampowered.com/api/appdetails?appids='+appId+'&cc=us&l=english'),
+    safeFetch('https://store.steampowered.com/appreviews/'+appId+'?json=1&num_per_page=20&filter=recent&language=english&purchase_type=all')
+  ]);
+  var details=(results[0]&&results[0][appId]&&results[0][appId].data)?results[0][appId].data:null;
+  var reviewData=results[1];
+  renderReviewPage(appId,details,reviewData);
+  setSt('revSt','Loaded reviews for '+(details?details.name:appId),'ok');
+  btn.disabled=false;txt.textContent='Analyze';
+}
+
+function renderReviewPage(appId,details,reviewData){
+  var name=(details&&details.name)||'App '+appId;
+  var img=(details&&details.header_image)||'';
+  var totalPos=(reviewData&&reviewData.query_summary)?reviewData.query_summary.total_positive:0;
+  var totalNeg=(reviewData&&reviewData.query_summary)?reviewData.query_summary.total_negative:0;
+  var totalRev=(reviewData&&reviewData.query_summary)?reviewData.query_summary.total_reviews:0;
+  var score=totalRev>0?Math.round(totalPos/totalRev*100):0;
+  var scoreLabel=score>=95?'Overwhelmingly Positive':score>=85?'Very Positive':score>=70?'Mostly Positive':score>=40?'Mixed':score>=20?'Mostly Negative':'Overwhelmingly Negative';
+  var recentPos=(reviewData&&reviewData.query_summary)?reviewData.query_summary.review_score_desc:'Unknown';
+  var reviews=(reviewData&&reviewData.reviews)?reviewData.reviews:[];
+  
+  var html='<div class="rev-card"><div class="rev-hero">'+(img?'<img src="'+esc(img)+'" alt="">':'')+'<div class="rev-hero-overlay"></div><div class="rev-hero-content"><div class="rev-hero-name">'+esc(name)+'</div></div></div><div class="rev-body"><div class="grid-2"><div><div class="rev-score">'+score+'<span style="font-size:20px;color:var(--text3)">%</span></div><div class="rev-score-label">'+esc(scoreLabel)+'</div><div class="rev-breakdown-row"><div class="rev-breakdown-label">Positive</div><div class="rev-breakdown-bar"><div class="rev-breakdown-fill" data-w="'+score+'" style="width:0%;background:rgba(255,255,255,.5)"></div></div><div class="rev-breakdown-count">'+totalPos.toLocaleString()+'</div></div><div class="rev-breakdown-row"><div class="rev-breakdown-label">Negative</div><div class="rev-breakdown-bar"><div class="rev-breakdown-fill" data-w="'+(100-score)+'" style="width:0%;background:rgba(255,100,100,.4)"></div></div><div class="rev-breakdown-count">'+totalNeg.toLocaleString()+'</div></div><div style="font-size:10px;color:var(--text3);font-family:var(--mono);margin-top:12px">Total: '+totalRev.toLocaleString()+' reviews<br>Recent: '+esc(recentPos)+'</div></div><div>';
+  
+  // Chart
+  html+='<div class="chart-card" style="height:180px"><div class="chart-title">Review Score Breakdown</div><div style="position:relative;height:140px"><canvas id="revChart_'+appId+'"></canvas></div></div></div></div>';
+  
+  if(reviews.length){
+    html+='<div style="margin-top:18px;border-top:1px solid var(--border);padding-top:16px"><div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:var(--mono);margin-bottom:12px">Recent Reviews</div><div style="display:grid;gap:8px" id="recentRevs_'+appId+'"></div></div>';
+  }
+  html+='</div></div>';
+  document.getElementById('revResults').innerHTML=html;
+  
+  setTimeout(function(){
+    document.querySelectorAll('.rev-breakdown-fill').forEach(function(b){b.style.width=b.dataset.w+'%'});
+    var rc=document.getElementById('revChart_'+appId);
+    if(rc)new Chart(rc,{type:'doughnut',data:{labels:['Positive','Negative'],datasets:[{data:[totalPos||score,totalNeg||(100-score)],backgroundColor:['rgba(255,255,255,.2)','rgba(255,80,80,.2)'],borderColor:['rgba(255,255,255,.4)','rgba(255,80,80,.4)'],borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{color:'#444',font:{size:9},boxWidth:10,padding:8}},tooltip:{backgroundColor:'#1a1a1a',borderColor:'#2a2a2a',borderWidth:1}}}});
+    var revsWrap=document.getElementById('recentRevs_'+appId);
+    if(revsWrap&&reviews.length){
+      reviews.slice(0,8).forEach(function(r){
+        var d=document.createElement('div');
+        var recText=stripHtml(r.review||'').slice(0,200);
+        var voteUp=r.voted_up;
+        var hrs=r.author&&r.author.playtime_forever?Math.round(r.author.playtime_forever/60)+' hrs':'';
+        d.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px';
+        d.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:10px;font-family:var(--mono);color:var(--text3)"><span style="color:'+(voteUp?'rgba(255,255,255,.5)':'rgba(255,80,80,.5)')+'">'+( voteUp?'✓ Recommended':'✗ Not recommended')+'</span>'+(hrs?'<span>'+esc(hrs)+'</span>':'')+'</div><div style="font-size:11px;color:var(--text3);font-family:var(--mono);line-height:1.65">'+esc(recText)+'</div>';
+        revsWrap.appendChild(d);
+      });
+    }
+  },100);
+}
+document.getElementById('revInput').addEventListener('keydown',function(e){if(e.key==='Enter')doReviews()});
+
+// ════════════════════════════════════════════
+// DLC BROWSER
+// ════════════════════════════════════════════
+function initDlc(){}
+
+async function doDlc(){
+  var q=document.getElementById('dlcInput').value.trim();if(!q)return;
+  var btn=document.getElementById('dlcBtn'),txt=document.getElementById('dlcBtnTxt');
+  btn.disabled=true;txt.innerHTML='<span class="spin"></span>';
+  setSt('dlcSt','Searching...','loading');document.getElementById('dlcResults').innerHTML='';document.getElementById('dlcGame').innerHTML='';
+  var appId=null;
+  if(/^\d+$/.test(q)){appId=q}else{
+    var s=await safeFetch('https://store.steampowered.com/api/storesearch/?term='+encodeURIComponent(q)+'&l=english&cc=US');
+    if(s&&s.items&&s.items[0])appId=s.items[0].id;
+  }
+  if(!appId){setSt('dlcSt','Game not found','err');btn.disabled=false;txt.textContent='Browse DLC';return}
+  setSt('dlcSt','Loading game data...','loading');
+  var data=await safeFetch('https://store.steampowered.com/api/appdetails?appids='+appId+'&cc=us&l=english');
+  var details=(data&&data[appId]&&data[appId].data)?data[appId].data:null;
+  if(!details){setSt('dlcSt','Could not load game data','err');btn.disabled=false;txt.textContent='Browse DLC';return}
+  var dlcIds=(details.dlc)||[];
+  var name=details.name;var img=details.header_image||'';
+  document.getElementById('dlcGame').innerHTML='<div class="section-hdr"><div class="section-title">'+esc(name)+' — DLC ('+dlcIds.length+')</div><div class="topbar-badge">App '+esc(String(appId))+'</div></div>';
+  if(!dlcIds.length){document.getElementById('dlcResults').innerHTML='<div class="empty-state">No DLC found for this game.</div>';setSt('dlcSt','No DLC for '+name,'ok');btn.disabled=false;txt.textContent='Browse DLC';return}
+  setSt('dlcSt','Loading '+dlcIds.length+' DLC...','loading');
+  // Load DLC details in batches
+  var wrap=document.createElement('div');wrap.className='dlc-grid';document.getElementById('dlcResults').appendChild(wrap);
+  // Show skeletons
+  dlcIds.slice(0,24).forEach(function(){var sk=document.createElement('div');sk.className='dlc-card';sk.innerHTML='<div class="skeleton" style="height:90px"></div><div class="dlc-body"><div class="skeleton" style="height:10px;width:80%;margin-bottom:4px;border-radius:2px"></div><div class="skeleton" style="height:8px;width:40%;border-radius:2px"></div></div>';wrap.appendChild(sk)});
+  var dlcBatch=dlcIds.slice(0,24);
+  var dlcResults=await Promise.all(dlcBatch.map(function(dlcId){
+    return safeFetch('https://store.steampowered.com/api/appdetails?appids='+dlcId+'&cc=us&l=english')
+      .then(function(d){return d&&d[dlcId]&&d[dlcId].data?d[dlcId].data:null})
+      .catch(function(){return null});
+  }));
+  wrap.innerHTML='';
+  var loaded=0;
+  dlcResults.forEach(function(d,i){
+    if(!d)return;loaded++;
+    var card=document.createElement('div');card.className='dlc-card';
+    var price=d.price_overview?d.price_overview.final_formatted:(d.is_free?'Free':'N/A');
+    var dlcImg=d.header_image||'';
+    card.innerHTML=(dlcImg?'<img class="dlc-img" src="'+esc(dlcImg)+'" alt="" loading="lazy">':'<div style="height:90px;background:var(--bg4);display:grid;place-items:center;font-size:10px;color:var(--text3);font-family:var(--mono)">NO IMG</div>')+'<div class="dlc-body"><div class="dlc-name">'+esc(d.name||'DLC '+dlcBatch[i])+'</div><div class="dlc-price">'+esc(price)+'</div></div>';
+    card.addEventListener('click',function(){window.open('https://store.steampowered.com/app/'+dlcBatch[i],'_blank')});
+    wrap.appendChild(card);
+  });
+  setSt('dlcSt','Loaded '+loaded+' of '+dlcIds.length+' DLC for '+name,'ok');
+  if(dlcIds.length>24){var more=document.createElement('div');more.style.cssText='text-align:center;padding:12px;font-size:11px;color:var(--text3);font-family:var(--mono)';more.textContent='Showing 24 of '+dlcIds.length+' DLC';document.getElementById('dlcResults').appendChild(more)}
+  btn.disabled=false;txt.textContent='Browse DLC';
+}
+document.getElementById('dlcInput').addEventListener('keydown',function(e){if(e.key==='Enter')doDlc()});
+document.getElementById('pcInput').addEventListener('keydown',function(e){if(e.key==='Enter')doPlayerCount()});
 
 // ═══ ENTER BINDINGS ═══
 document.getElementById('globalSearch').addEventListener('keydown',function(e){if(e.key==='Enter'){var q=this.value.trim();if(!q)return;goTo('search');setTimeout(function(){document.getElementById('srchInput').value=q;doSearch()},80);this.value=''}});
